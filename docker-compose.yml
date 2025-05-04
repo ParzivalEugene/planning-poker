@@ -1,0 +1,43 @@
+name: "poker-planning"
+
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:latest
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+      - "5432:5432"
+    environment:
+      - TIMEWEBCLOUD_AUTH_TOKEN=${TIMEWEBCLOUD_AUTH_TOKEN}
+    labels:
+      - "traefik.http.routers.traefik.rule=Host(`poker-traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=myresolver"
+      - "traefik.http.routers.traefik.service=api@internal"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./compose/traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ./compose/traefik/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml
+
+  database:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
+    command: -p ${DATABASE_PORT}
+    volumes:
+      - database-volume:/var/lib/postgresql/data
+    labels:
+      - "traefik.tcp.routers.database.rule=HostSNI(`database.${DOMAIN}`)"
+      - "traefik.tcp.routers.database.entrypoints=tcp"
+      - "traefik.tcp.routers.database.tls.certresolver=myresolver"
+      - "traefik.tcp.services.database.loadbalancer.server.port=${DATABASE_PORT}"
+
+volumes:
+  database-volume:
