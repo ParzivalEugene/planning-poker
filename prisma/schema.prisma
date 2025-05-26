@@ -7,19 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum CardType {
-  ZERO
-  ONE
-  TWO
-  THREE
-  FIVE
-  EIGHT
-  THIRTEEN
-  TWENTY_ONE
-  QUESTION_MARK
-  COFFEE
-}
-
 model User {
   id       String     @id @default(uuid())
   username String
@@ -28,31 +15,29 @@ model User {
 }
 
 model Room {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-  users     User[]   @relation("RoomUsers")
-  games     Game[]
+  id    String @id @default(uuid())
+  name  String
+  users User[] @relation("RoomUsers")
+  games Game[]
 }
 
 model Game {
   id          String     @id @default(uuid())
   title       String
   description String?
-  createdAt   DateTime   @default(now())
   isRevealed  Boolean    @default(false)
   roomId      String
-  room        Room       @relation(fields: [roomId], references: [id])
+  room        Room       @relation(fields: [roomId], references: [id], onDelete: Cascade)
   votes       UserCard[]
 }
 
 model UserCard {
-  id     String   @id @default(uuid())
-  card   CardType
+  id     String @id @default(uuid())
+  card   String
   userId String
-  user   User     @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   gameId String
-  game   Game     @relation(fields: [gameId], references: [id])
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
 
   @@unique([userId, gameId])
 }

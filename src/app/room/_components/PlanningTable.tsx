@@ -1,19 +1,26 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { useI18n } from "@/contexts/I18nContext";
 import { PlayerCard } from "./PlayerCard";
 import { type Player, type PlayerPosition } from "./types";
 
 export type PlanningTableProps = {
   players: Player[];
   title?: string;
-  isRevealed?: boolean; // Will be used in the future to toggle card reveal functionality
+  isRevealed?: boolean;
+  onStartNewRound?: () => void;
+  isStartingNewRound?: boolean;
 };
 
 export function PlanningTable({
   players,
   title = "Planning Area",
-  isRevealed: _isRevealed = false,
+  isRevealed = false,
+  onStartNewRound,
+  isStartingNewRound = false,
 }: PlanningTableProps) {
-  // isRevealed param renamed to _isRevealed locally to mark as intentionally unused
-
+  const { t } = useI18n();
   // Define the table grid layout - 5 columns and 4 rows
   const gridLayout = [
     // Top row - positions 2-1, 3-1, 4-1
@@ -85,6 +92,7 @@ export function PlanningTable({
             key={`top-${index}`}
             player={item.player}
             position="top"
+            isRevealed={isRevealed}
           />
         ))}
       </div>
@@ -98,16 +106,60 @@ export function PlanningTable({
               key={`left-${index}`}
               player={item.player}
               position="left"
+              isRevealed={isRevealed}
             />
           ))}
         </div>
 
         {/* Center table - constrained to not take over the screen */}
         <div className="w-full max-w-[380px] flex-1 px-2 sm:px-3 md:px-4 lg:max-w-[450px] lg:px-5 xl:max-w-[500px]">
-          <div className="bg-card z-10 mx-auto flex aspect-[3/2] w-full items-center justify-center rounded-xl border p-4 shadow-lg sm:aspect-[4/3] md:aspect-[5/3]">
-            <h2 className="text-card-foreground text-lg font-bold sm:text-xl md:text-2xl">
+          <div className="bg-card z-10 mx-auto flex aspect-[3/2] w-full flex-col items-center justify-center rounded-xl border p-4 shadow-lg sm:aspect-[4/3] md:aspect-[5/3]">
+            <h2 className="text-card-foreground mb-2 text-lg font-bold sm:text-xl md:text-2xl">
               {title}
             </h2>
+            {players.length > 0 && (
+              <div className="text-center">
+                {players.length >= 9 && (
+                  <div
+                    className={`mb-2 text-xs font-medium ${players.length >= 10 ? "text-red-600" : "text-yellow-600"}`}
+                  >
+                    {players.length >= 10
+                      ? t("room.roomFullStatus")
+                      : t("room.almostFullStatus", { current: players.length })}
+                  </div>
+                )}
+                {isRevealed ? (
+                  <div className="space-y-3">
+                    <div className="font-medium text-green-600">
+                      {t("room.cardsRevealedStatus")}
+                    </div>
+                    {onStartNewRound && (
+                      <Button
+                        onClick={onStartNewRound}
+                        variant="outline"
+                        disabled={isStartingNewRound}
+                        size="sm"
+                      >
+                        {t("room.startNewRound")}
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground text-sm">
+                    {t("room.votingStatus", {
+                      voted: players.filter((p) => p.selectedCard).length,
+                      total: players.length,
+                    })}
+                    {players.every((p) => p.selectedCard) &&
+                      players.length > 0 && (
+                        <div className="mt-1 font-medium text-blue-600">
+                          {t("room.revealingCards")}
+                        </div>
+                      )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -118,6 +170,7 @@ export function PlanningTable({
               key={`right-${index}`}
               player={item.player}
               position="right"
+              isRevealed={isRevealed}
             />
           ))}
         </div>
@@ -130,6 +183,7 @@ export function PlanningTable({
             key={`bottom-${index}`}
             player={item.player}
             position="bottom"
+            isRevealed={isRevealed}
           />
         ))}
       </div>

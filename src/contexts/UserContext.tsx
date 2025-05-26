@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
 import { api } from "@/trpc/react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type User = {
   id: string;
@@ -34,7 +34,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const storedUser = localStorage.getItem(USER_STORAGE_KEY);
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        setUser(JSON.parse(storedUser) as User);
       } catch (error) {
         console.error("Failed to parse stored user:", error);
         localStorage.removeItem(USER_STORAGE_KEY);
@@ -54,11 +54,25 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   // Refresh user data if needed from the server
   useEffect(() => {
-    if (userQuery.data === null && user) {
-      // If the user doesn't exist on the server anymore, log them out
-      setUser(null);
+    if (
+      userQuery.data === null &&
+      user &&
+      !userQuery.isLoading &&
+      !userQuery.isError &&
+      !loginMutation.isPending
+    ) {
+      // User exists in localStorage but not on server (server restart)
+      // Re-register the user automatically
+      console.log("User not found on server, re-registering:", user.username);
+      loginMutation.mutate({ username: user.username });
     }
-  }, [userQuery.data, user]);
+  }, [
+    userQuery.data,
+    user,
+    userQuery.isLoading,
+    userQuery.isError,
+    loginMutation,
+  ]);
 
   const login = async (username: string) => {
     try {

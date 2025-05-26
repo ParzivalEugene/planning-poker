@@ -3,9 +3,11 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
-import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/components/theme-provider";
+import { I18nProvider } from "@/contexts/I18nContext";
 import { UserProvider } from "@/contexts/UserContext";
+import { TRPCReactProvider } from "@/trpc/react";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Planning Poker",
@@ -23,16 +25,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={geist.variable} suppressHydrationWarning>
       <body>
-        <TRPCReactProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <UserProvider>{children}</UserProvider>
-          </ThemeProvider>
-        </TRPCReactProvider>
+        <I18nProvider>
+          <TRPCReactProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <UserProvider>{children}</UserProvider>
+              <Toaster position="bottom-right" />
+            </ThemeProvider>
+          </TRPCReactProvider>
+        </I18nProvider>
       </body>
     </html>
   );

@@ -1,13 +1,23 @@
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
+import { useI18n } from "@/contexts/I18nContext";
 import { type Player, type PlayerPosition } from "./types";
 
 type PlayerCardProps = {
   player?: Player;
   className?: string;
   position?: PlayerPosition;
+  isRevealed?: boolean;
 };
 
-export function PlayerCard({ player, className, position }: PlayerCardProps) {
+export function PlayerCard({
+  player,
+  className,
+  position,
+  isRevealed = false,
+}: PlayerCardProps) {
+  const { t } = useI18n();
   const isEmpty = !player;
 
   // Define special styling based on position for better alignment
@@ -26,13 +36,16 @@ export function PlayerCard({ player, className, position }: PlayerCardProps) {
         className={`xs:h-22 xs:w-16 mb-2 flex h-20 w-14 items-center justify-center transition-transform hover:scale-105 sm:h-24 sm:w-18 ${isEmpty ? "border-muted bg-muted/5 border-2 border-dashed" : ""} `}
       >
         <CardContent className="flex h-full items-center justify-center p-0">
-          {!isEmpty && player?.selectedCard && (
+          {!isEmpty && player?.selectedCard && isRevealed && (
             <span className="xs:text-2xl text-xl font-bold sm:text-3xl">
               {player.selectedCard}
             </span>
           )}
+          {!isEmpty && player?.selectedCard && !isRevealed && (
+            <span className="text-muted-foreground text-3xl">✅</span>
+          )}
           {!isEmpty && !player?.selectedCard && (
-            <span className="text-muted-foreground text-xs">Thinking...</span>
+            <span className="text-muted-foreground text-3xl">🤔</span>
           )}
         </CardContent>
       </Card>
@@ -40,7 +53,7 @@ export function PlayerCard({ player, className, position }: PlayerCardProps) {
       <span
         className={`text-xs font-medium sm:text-sm ${isEmpty ? "text-muted-foreground" : ""} max-w-[80px] truncate`}
       >
-        {isEmpty ? "Empty seat" : player.name}
+        {isEmpty ? t("room.emptySeat") : player.name}
       </span>
     </div>
   );

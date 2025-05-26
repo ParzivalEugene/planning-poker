@@ -1,143 +1,159 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+"use client";
 
-export default async function Home() {
-  // Array of poker planning card values
-  const cardValues = ["0", "1", "2", "3", "5", "8", "13", "20", "40", "100"];
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useI18n } from "@/contexts/I18nContext";
+import { useUser } from "@/contexts/UserContext";
+import { generateRoomId, isValidRoomId } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+export default function HomePage() {
+  const router = useRouter();
+  const { user } = useUser();
+  const { t } = useI18n();
+  const [roomId, setRoomId] = useState("");
+
+  const handleCreateRoom = () => {
+    if (!user) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const newRoomId = generateRoomId();
+    router.push(`/room/${newRoomId}`);
+  };
+
+  const handleJoinRoom = () => {
+    if (!roomId.trim()) {
+      return;
+    }
+
+    const cleanRoomId = roomId.trim().toLowerCase();
+
+    if (!isValidRoomId(cleanRoomId)) {
+      return;
+    }
+
+    if (!user) {
+      router.push(`/sign-in?room=${cleanRoomId}`);
+      return;
+    }
+
+    router.push(`/room/${cleanRoomId}`);
+  };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header/Nav Bar */}
-      <header className="bg-card/50 w-full border-b backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-md">
-              <span className="text-primary-foreground font-bold">PP</span>
-            </div>
-            <span className="font-semibold">Poker Planning</span>
-          </div>
-
-          {/* Room Info & Copy Button */}
-          <div className="flex items-center gap-4">
-            {/* Users in the room */}
-            <div className="flex -space-x-2">
-              <div className="border-background flex h-8 w-8 items-center justify-center rounded-full border-2 bg-blue-500 text-xs font-medium text-white">
-                JD
-              </div>
-              <div className="border-background flex h-8 w-8 items-center justify-center rounded-full border-2 bg-green-500 text-xs font-medium text-white">
-                AM
-              </div>
-              <div className="border-background flex h-8 w-8 items-center justify-center rounded-full border-2 bg-yellow-500 text-xs font-medium text-white">
-                RK
-              </div>
-              <div className="bg-background border-background text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium">
-                +2
-              </div>
-            </div>
-            <Button>
-              <Copy size={16} />
-              Copy Room link
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main content */}
-      <div className="flex flex-1 items-center justify-center p-8">
-        <div className="grid grid-cols-5 grid-rows-4 gap-8">
-          <div className="bg-card z-10 col-span-3 col-start-2 row-span-2 row-start-2 flex h-64 w-96 items-center justify-center rounded-xl border shadow-lg">
-            <h2 className="text-card-foreground text-2xl font-bold">
-              Planning Area
-            </h2>
-          </div>
-
-          <PlanningCard
-            value={cardValues[0]}
-            className="col-start-2 row-start-1"
-          />
-          <PlanningCard
-            value={cardValues[1]}
-            className="col-start-3 row-start-1"
-          />
-          <PlanningCard
-            value={cardValues[2]}
-            className="col-start-4 row-start-1"
-          />
-
-          <PlanningCard
-            value={cardValues[3]}
-            className="col-start-1 row-start-2"
-          />
-          <PlanningCard
-            value={cardValues[4]}
-            className="col-start-1 row-start-3"
-          />
-
-          <PlanningCard
-            value={cardValues[5]}
-            className="col-start-5 row-start-2"
-          />
-          <PlanningCard
-            value={cardValues[6]}
-            className="col-start-5 row-start-3"
-          />
-
-          <PlanningCard
-            value={cardValues[7]}
-            className="col-start-2 row-start-4"
-          />
-          <PlanningCard
-            value={cardValues[8]}
-            className="col-start-3 row-start-4"
-          />
-          <PlanningCard
-            value={cardValues[9]}
-            className="col-start-4 row-start-4"
-          />
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+      {/* Language Selector */}
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
       </div>
 
-      {/* Footer with available cards */}
-      <footer className="bg-background border-t px-6 py-4">
-        <div className="container mx-auto">
-          <div className="flex flex-col gap-2">
-            <p className="text-muted-foreground mb-2 text-sm">
-              Available Cards:
+      <div className="w-full max-w-md space-y-8">
+        {/* Header */}
+        <div className="text-center">
+          <div className="bg-primary mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+            <span className="text-primary-foreground text-2xl font-bold">
+              PP
+            </span>
+          </div>
+          <h1 className="text-3xl font-bold">{t("home.title")}</h1>
+          <p className="text-muted-foreground mt-2">{t("home.subtitle")}</p>
+        </div>
+
+        {/* User Status */}
+        {user && (
+          <div className="text-center">
+            <p className="text-muted-foreground text-sm">
+              {t("home.welcomeBack", { username: user.username })}
             </p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {cardValues.map((value) => (
-                <button key={value} className="group relative">
-                  <Card className="group-hover:border-primary flex h-16 w-12 items-center justify-center transition-all hover:shadow-md">
-                    <CardContent className="flex h-full items-center justify-center p-0">
-                      <span className="font-bold">{value}</span>
-                    </CardContent>
-                  </Card>
-                </button>
-              ))}
-            </div>
+          </div>
+        )}
+
+        {/* Main Actions */}
+        <div className="space-y-4">
+          {/* Create Room */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">
+                {t("home.createRoom.title")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleCreateRoom} className="w-full" size="lg">
+                {t("home.createRoom.button")}
+              </Button>
+              <p className="text-muted-foreground mt-2 text-center text-xs">
+                {t("home.createRoom.description")}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Join Room */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">
+                {t("home.joinRoom.title")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="roomId">{t("common.roomId")}</Label>
+                <Input
+                  id="roomId"
+                  placeholder={t("home.joinRoom.placeholder")}
+                  value={roomId}
+                  onChange={(e) => setRoomId(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleJoinRoom();
+                    }
+                  }}
+                />
+                <p className="text-muted-foreground text-xs">
+                  {t("home.joinRoom.description")}
+                </p>
+              </div>
+              <Button
+                onClick={handleJoinRoom}
+                variant="outline"
+                className="w-full"
+                size="lg"
+                disabled={!roomId.trim()}
+              >
+                {t("home.joinRoom.button")}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Features */}
+        <div className="text-muted-foreground text-center text-sm">
+          <p className="mb-2">{t("home.features.title")}</p>
+          <div className="space-y-1">
+            <p>{t("home.features.realtime")}</p>
+            <p>{t("home.features.sharing")}</p>
+            <p>{t("home.features.rounds")}</p>
+            <p>{t("home.features.capacity")}</p>
+          </div>
+          <div className="mt-3 text-xs">
+            <p>
+              {t("home.features.enterprise").split("{contactLink}")[0]}
+              <a
+                href="mailto:contact@michkoff.com"
+                className="text-primary hover:text-primary/80 underline"
+              >
+                {t("home.features.contactUs")}
+              </a>
+              {t("home.features.enterprise").split("{contactLink}")[1]}
+            </p>
           </div>
         </div>
-      </footer>
-    </div>
-  );
-}
-
-function PlanningCard({
-  value,
-  className,
-}: {
-  value: string;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <Card className="flex h-full w-full items-center justify-center transition-transform">
-        <CardContent className="flex h-full items-center justify-center p-0">
-          <span className="text-3xl font-bold">{value}</span>
-        </CardContent>
-      </Card>
+      </div>
     </div>
   );
 }

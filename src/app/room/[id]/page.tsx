@@ -1,62 +1,309 @@
 "use client";
 
-import { useParams, redirect } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
-import { Copy, LogOut } from "lucide-react";
-import { PlanningTable } from "../_components/PlanningTable";
-import { type Player } from "../_components/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { useI18n } from "@/contexts/I18nContext";
 import { useUser } from "@/contexts/UserContext";
+import { isValidRoomId } from "@/lib/utils";
+import { api } from "@/trpc/react";
+import { Copy, LogOut } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { PlanningTable } from "../_components/PlanningTable";
 
 export default function Page() {
-  const { id } = useParams<{ id: string }>();
-  const { user, logout } = useUser();
+  const params = useParams();
+  const id = params.id as string;
+  const router = useRouter();
+  const { user, logout, isLoading } = useUser();
+  const { t } = useI18n();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [isSelectingCard, setIsSelectingCard] = useState(false);
 
-  // Room ID will be used for real-time connection in a production app
-  console.log("Room ID:", id);
+  const hasJoinedRoom = useRef(false);
 
   const cardValues = ["0", "1", "2", "3", "5", "8", "13", "20", "40", "100"];
 
-  // Sample player data - in a real app this would come from a database or API
-  const players: Player[] = [
-    { id: "1", name: "John Doe", selectedCard: "5" },
-    { id: "2", name: "Alice Miller", selectedCard: null },
-    { id: "3", name: "Robert Knight", selectedCard: "8" },
-    { id: "4", name: "Emily Chen", selectedCard: "3" },
-    { id: "5", name: "David Smith", selectedCard: "13" },
-    { id: "6", name: "Lisa Wang", selectedCard: null },
-    { id: "7", name: "Michael Brown", selectedCard: "2" },
-  ];
+  // Validate room ID format
+  useEffect(() => {
+    if (id && !isValidRoomId(id)) {
+      router.push("/");
+      return;
+    }
+  }, [id, router]);
 
-  // Add the current user to the players list if they're not already there
-  const currentUserInGame = user
-    ? players.some((player) => player.id === user.id)
-    : false;
+  // Redirect to sign-in if user is not authenticated
+  useEffect(() => {
+    if (!isLoading && !user && id && isValidRoomId(id)) {
+      router.push(`/sign-in?room=${id}`);
+    }
+  }, [id, user, isLoading, router]);
 
-  const playersWithCurrentUser =
-    !currentUserInGame && user
-      ? [...players, { id: user.id, name: user.username, selectedCard }]
-      : players;
+  // Join room mutation
+  const joinRoomMutation = api.poker.joinRoom.useMutation({
+    onSuccess: (data) => {
+      // Immediately update the cache with the returned player data
+      utils.poker.getRoomState.setData({ roomId: id }, (oldData) => ({
+        players: data.players,
+        isRevealed: oldData?.isRevealed ?? false,
+        allPlayersVoted: oldData?.allPlayersVoted ?? false,
+      }));
+    },
+    onError: (error) => {
+      const errorMessage = error.message ?? t("errors.unknownError");
+
+      if (errorMessage.includes("Room is full")) {
+        // Special handling for room full error - redirect to home page
+        setTimeout(() => {
+          router.push("/");
+        }, 1000);
+      } else {
+        // Reset the join flag so user can try again
+        hasJoinedRoom.current = false;
+      }
+    },
+  });
+
+  // Select card mutation
+  const selectCardMutation = api.poker.selectCard.useMutation({
+    onSuccess: () => {
+      // Invalidate room state to ensure UI updates
+      void utils.poker.getRoomState.invalidate({ roomId: id });
+    },
+    onError: (error) => {
+      // Reset selected card on error
+      setSelectedCard(null);
+    },
+    onSettled: () => {
+      // Reset selecting state when mutation completes (success or error)
+      setIsSelectingCard(false);
+    },
+  });
+
+  // Start new round mutation
+  const utils = api.useUtils();
+  const startNewRoundMutation = api.poker.startNewRound.useMutation({
+    onSuccess: () => {
+      // Reset local state immediately
+      setSelectedCard(null);
+      setIsSelectingCard(false);
+
+      // The subscription will handle the cache update, but we can also
+      // optimistically update the cache here for immediate feedback
+      utils.poker.getRoomState.setData({ roomId: id }, (oldData) =>
+        oldData
+          ? {
+              ...oldData,
+              isRevealed: false,
+              allPlayersVoted: false,
+              players: oldData.players.map((p) => ({
+                ...p,
+                selectedCard: null,
+              })),
+            }
+          : undefined,
+      );
+    },
+    onError: (error) => {
+      // Silent error handling
+    },
+  });
+
+  // Get room state query
+  const { data: roomState, refetch: refetchRoomState } =
+    api.poker.getRoomState.useQuery(
+      { roomId: id ?? "" },
+      {
+        enabled: !!id && !!user && isValidRoomId(id),
+        // No polling needed since we have real-time subscriptions
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: true,
+      },
+    );
+
+  // Subscribe to room updates
+  api.poker.onRoomUpdate.useSubscription(
+    { roomId: id ?? "" },
+    {
+      enabled: !!id && !!user && isValidRoomId(id),
+      onData: (data) => {
+        console.log("Room update:", data);
+
+        // Handle different event types with proper state management
+        switch (data.data.type) {
+          case "newRoundStarted":
+            // Reset selected card immediately
+            setSelectedCard(null);
+            setIsSelectingCard(false);
+
+            // Update cache with new round state
+            utils.poker.getRoomState.setData(
+              { roomId: id },
+              {
+                players: data.data.players,
+                isRevealed: false,
+                allPlayersVoted: false,
+              },
+            );
+            break;
+
+          case "cardsRevealed":
+            // Update cache with revealed state
+            if ("isRevealed" in data.data && "allPlayersVoted" in data.data) {
+              utils.poker.getRoomState.setData(
+                { roomId: id },
+                {
+                  players: data.data.players,
+                  isRevealed: data.data.isRevealed ?? true,
+                  allPlayersVoted: data.data.allPlayersVoted ?? true,
+                },
+              );
+            } else {
+              // Fallback to invalidate if event doesn't have complete state
+              void utils.poker.getRoomState.invalidate({ roomId: id });
+            }
+            break;
+
+          case "cardSelected":
+          case "playerJoined":
+            // For these events, just invalidate to trigger a refetch
+            void utils.poker.getRoomState.invalidate({ roomId: id });
+            break;
+
+          default:
+            // For unknown events, invalidate to be safe
+            void utils.poker.getRoomState.invalidate({ roomId: id });
+            break;
+        }
+      },
+      onError: (error) => {
+        console.error("Subscription error:", error);
+      },
+    },
+  );
+
+  // Join room when user logs in and room ID is valid
+  useEffect(() => {
+    if (user && id && isValidRoomId(id) && !hasJoinedRoom.current) {
+      hasJoinedRoom.current = true;
+      joinRoomMutation.mutate({
+        roomId: id,
+        playerId: user.id,
+        playerName: user.username,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, id]);
+
+  // Check if user appears in room after joining, retry if not
+  useEffect(() => {
+    if (
+      user &&
+      roomState &&
+      hasJoinedRoom.current &&
+      !joinRoomMutation.isPending
+    ) {
+      const userInRoom = roomState.players.some((p) => p.id === user.id);
+      if (!userInRoom) {
+        console.log("User not found in room, retrying join...");
+        // Reset and retry joining
+        hasJoinedRoom.current = false;
+        setTimeout(() => {
+          if (!hasJoinedRoom.current) {
+            hasJoinedRoom.current = true;
+            joinRoomMutation.mutate({
+              roomId: id,
+              playerId: user.id,
+              playerName: user.username,
+            });
+          }
+        }, 1000); // Wait 1 second before retrying
+      }
+    }
+  }, [user, roomState, joinRoomMutation, id]);
+
+  // Reset selected card when starting a new round or when user has no vote
+  useEffect(() => {
+    if (roomState && !roomState.isRevealed) {
+      // Check if the current user has no vote in the current round
+      const currentUser = roomState.players.find((p) => p.id === user?.id);
+      if (currentUser && !currentUser.selectedCard && selectedCard) {
+        // User had a selected card but doesn't have a vote in current round
+        // This means a new round started
+        setSelectedCard(null);
+      }
+    }
+  }, [roomState?.isRevealed, roomState?.players, selectedCard, user?.id]);
 
   const copyRoomLink = () => {
     const roomLink = `${window.location.origin}/room/${id}`;
-    navigator.clipboard.writeText(roomLink);
-    toast.success("Room link copied to clipboard");
+    navigator.clipboard.writeText(roomLink).catch(() => {
+      // Silent error handling
+    });
   };
 
   const handleCardSelect = (value: string) => {
+    if (!user) {
+      return;
+    }
+
+    // Prevent rapid clicking
+    if (isSelectingCard) {
+      return;
+    }
+
+    // Check if cards are revealed - use the most up-to-date state
+    if (roomState?.isRevealed) {
+      return;
+    }
+
+    // Optimistically update the selected card and set selecting state
     setSelectedCard(value);
-    toast.success(`You selected card: ${value}`);
-    // In a real app, you would send this to the server
+    setIsSelectingCard(true);
+
+    selectCardMutation.mutate({
+      roomId: id,
+      playerId: user.id,
+      cardValue: value,
+    });
+  };
+
+  const handleStartNewRound = () => {
+    startNewRoundMutation.mutate({
+      roomId: id,
+    });
   };
 
   const handleLogout = () => {
+    toast.success(t("room.loggedOut"));
     logout();
-    toast.success("Logged out successfully");
   };
+
+  // Show loading or redirect if not authenticated
+  if (!id || !isValidRoomId(id)) {
+    return null; // Will redirect
+  }
+
+  // Show nothing for non-authenticated users (will redirect to sign-in)
+  if (!user) {
+    return null;
+  }
+
+  // Show loading state while user context is still loading
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="border-primary mx-auto h-8 w-8 animate-spin rounded-full border-b-2"></div>
+          <p className="text-muted-foreground mt-2">{t("common.loading")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const players = roomState?.players ?? [];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -66,46 +313,40 @@ export default function Page() {
             <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-md">
               <span className="text-primary-foreground font-bold">PP</span>
             </div>
-            <span className="font-semibold">Planning Poker</span>
+
+            <span className="mr-8 font-semibold">{t("home.title")}</span>
+            <LanguageSelector />
           </div>
 
           <div className="flex items-center gap-4">
-            {user && (
-              <div className="mr-2 text-sm">
-                Logged in as:{" "}
-                <span className="font-medium">{user.username}</span>
+            <div className="text-center">
+              <div className="text-muted-foreground text-xs">
+                {t("common.players")}
               </div>
-            )}
-            <div className="flex -space-x-2">
-              {playersWithCurrentUser.slice(0, 3).map((player, index) => (
-                <div
-                  key={player.id}
-                  className={`border-background flex h-8 w-8 items-center justify-center rounded-full border-2 ${
-                    ["bg-blue-500", "bg-green-500", "bg-yellow-500"][index % 3]
-                  } text-xs font-medium text-white`}
-                >
-                  {player.name
-                    .split(" ")
-                    .map((part) => part[0])
-                    .join("")}
-                </div>
-              ))}
-              {playersWithCurrentUser.length > 3 && (
-                <div className="bg-background border-background text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium">
-                  +{playersWithCurrentUser.length - 3}
-                </div>
-              )}
+              <div
+                className={`text-sm font-medium ${players.length >= 10 ? "text-red-500" : players.length >= 8 ? "text-yellow-500" : "text-green-500"}`}
+              >
+                {players.length}/10
+              </div>
             </div>
+            <div className="text-center">
+              <div className="text-muted-foreground text-xs">
+                {t("common.roomId")}
+              </div>
+              <div className="font-mono text-sm font-medium">{id}</div>
+            </div>
+
             <div className="flex gap-2">
               <Button onClick={copyRoomLink}>
                 <Copy size={16} className="mr-1" />
-                Copy Link
+                {t("common.copy")}
               </Button>
+
               <Button
                 variant="outline"
                 size="icon"
                 onClick={handleLogout}
-                title="Logout"
+                title={t("common.logout")}
               >
                 <LogOut size={16} />
               </Button>
@@ -116,10 +357,12 @@ export default function Page() {
 
       <div className="flex flex-1 items-center justify-center p-3 sm:p-4 md:p-6 lg:p-8">
         <div className="mx-auto flex h-full w-full items-center justify-center">
-          {/* Use the updated PlanningTable component with players array */}
           <PlanningTable
-            players={playersWithCurrentUser}
-            title="Planning Poker Session"
+            players={players}
+            title={t("room.title")}
+            isRevealed={roomState?.isRevealed ?? false}
+            onStartNewRound={handleStartNewRound}
+            isStartingNewRound={startNewRoundMutation.isPending}
           />
         </div>
       </div>
@@ -128,29 +371,61 @@ export default function Page() {
         <div className="container mx-auto">
           <div className="flex flex-col gap-2">
             <p className="text-muted-foreground mb-1 text-center text-xs sm:mb-2 sm:text-sm">
-              Available Cards:
+              {roomState?.isRevealed
+                ? t("room.cardsRevealedFooter")
+                : t("room.availableCards")}
             </p>
             <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-1.5 sm:gap-2">
-              {cardValues.map((value) => (
-                <button
-                  key={value}
-                  className="group relative"
-                  onClick={() => handleCardSelect(value)}
-                >
-                  <Card
-                    className={`group-hover:border-primary flex h-14 w-10 items-center justify-center transition-all hover:scale-110 hover:shadow-md sm:h-16 sm:w-12 ${
-                      selectedCard === value
-                        ? "border-primary bg-primary/10 border-2"
-                        : ""
-                    }`}
+              {cardValues.map((value) => {
+                const isDisabled =
+                  selectCardMutation.isPending ||
+                  (roomState?.isRevealed ?? false) ||
+                  isSelectingCard;
+                const isSelected =
+                  selectedCard === value && !roomState?.isRevealed;
+
+                return (
+                  <button
+                    key={value}
+                    className="group relative"
+                    onClick={() => handleCardSelect(value)}
+                    disabled={isDisabled}
                   >
-                    <CardContent className="flex h-full items-center justify-center p-0">
-                      <span className="font-bold">{value}</span>
-                    </CardContent>
-                  </Card>
-                </button>
-              ))}
+                    <Card
+                      className={`group-hover:border-primary flex h-14 w-10 items-center justify-center transition-all hover:scale-110 hover:shadow-md sm:h-16 sm:w-12 ${
+                        isSelected
+                          ? "border-primary bg-primary/10 border-2"
+                          : ""
+                      } ${isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                    >
+                      <CardContent className="flex h-full items-center justify-center p-0">
+                        <span className="font-bold">{value}</span>
+                      </CardContent>
+                    </Card>
+                  </button>
+                );
+              })}
             </div>
+
+            {players.length >= 8 && (
+              <div className="mt-2 text-center">
+                <p className="text-muted-foreground text-xs">
+                  {t("room.capacityWarning", { current: players.length })}
+                  {players.length >= 10 && (
+                    <span className="mt-1 block text-yellow-600">
+                      {t("room.capacityFull").split("{contactLink}")[0]}
+                      <a
+                        href="mailto:contact@michkoff.com"
+                        className="underline hover:text-yellow-500"
+                      >
+                        contact@michkoff.com
+                      </a>
+                      {t("room.capacityFull").split("{contactLink}")[1]}
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </footer>

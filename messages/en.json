@@ -1,0 +1,72 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "copy": "Copy Link",
+    "logout": "Logout",
+    "signIn": "Sign In",
+    "username": "Username",
+    "roomId": "Room ID",
+    "players": "Players"
+  },
+  "home": {
+    "title": "Planning Poker",
+    "subtitle": "Collaborative estimation made simple",
+    "welcomeBack": "Welcome back, {username}!",
+    "createRoom": {
+      "title": "Create New Room",
+      "button": "Create Room",
+      "description": "Generate a new room with a unique ID"
+    },
+    "joinRoom": {
+      "title": "Join Existing Room",
+      "button": "Join Room",
+      "placeholder": "abc-defg-jkl",
+      "description": "Enter the 9-character room ID (format: abc-defg-jkl)"
+    },
+    "features": {
+      "title": "✨ Features:",
+      "realtime": "• Real-time voting and card reveals",
+      "sharing": "• Easy room sharing with readable IDs",
+      "rounds": "• Multiple estimation rounds",
+      "capacity": "• Up to 10 players per room",
+      "enterprise": "Need more capacity? {contactLink} for partnership opportunities 💰",
+      "contactUs": "Contact us"
+    }
+  },
+  "room": {
+    "title": "Planning Poker Session",
+    "roomFull": "Room is full (maximum 10 players). For enterprise solutions with higher capacity, please contact contact@michkoff.com to discuss partnership opportunities.",
+    "loggedOut": "Logged out successfully",
+    "cardsRevealedFooter": "Cards Revealed - Start New Round to Vote Again",
+    "availableCards": "Available Cards:",
+    "capacityWarning": "Room capacity: {current}/10 players",
+    "capacityFull": "Need more capacity? Contact {contactLink} for partnership opportunities 💰",
+    "startNewRound": "Start New Round",
+    "emptySeat": "Empty seat",
+    "votingStatus": "{voted}/{total} players voted",
+    "cardsRevealedStatus": "Cards Revealed!",
+    "roomFullStatus": "Room Full (10/10)",
+    "almostFullStatus": "Almost Full ({current}/10)",
+    "revealingCards": "Revealing cards..."
+  },
+  "signIn": {
+    "title": "Sign In",
+    "subtitle": "Enter your username to continue",
+    "subtitleWithRoom": "Enter your username to join room {roomId}",
+    "welcome": "Welcome to Planning Poker",
+    "enterUsername": "Enter your username",
+    "signingIn": "Signing In...",
+    "welcomeMessage": "Welcome to Planning Poker!",
+    "redirectMessage": "You'll be redirected to room {roomId} after signing in"
+  },
+  "errors": {
+    "roomNotFound": "Room not found",
+    "userNotFound": "User not found",
+    "gameNotFound": "No active game found for this room",
+    "unknownError": "Unknown error"
+  }
+}
