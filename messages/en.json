@@ -30,10 +30,10 @@
     "features": {
       "title": "✨ Features:",
       "subtitle": "Everything you need for effective planning poker sessions",
-      "realtime": "• Real-time voting and card reveals",
-      "sharing": "• Easy room sharing with readable IDs",
-      "rounds": "• Multiple estimation rounds",
-      "capacity": "• Up to 10 players per room",
+      "realtime": "Real-time voting and card reveals",
+      "sharing": "Easy room sharing with readable IDs",
+      "rounds": "Multiple estimation rounds",
+      "capacity": "Up to 10 players per room",
       "enterprise": "Need more capacity? {contactLink} for partnership opportunities 💰",
       "contactUs": "Contact us"
     }
@@ -42,6 +42,7 @@
     "title": "Planning Poker",
     "roomFull": "Room is full (maximum 10 players). For enterprise solutions with higher capacity, please contact contact@michkoff.com to discuss partnership opportunities.",
     "loggedOut": "Logged out successfully",
+    "linkCopied": "Room link copied to clipboard",
     "cardsRevealedFooter": "Cards Revealed - Start New Round to Vote Again",
     "availableCards": "Available Cards:",
     "capacityWarning": "Room capacity: {current}/10 players",
@@ -52,7 +53,11 @@
     "cardsRevealedStatus": "Cards Revealed!",
     "roomFullStatus": "Room Full (10/10)",
     "almostFullStatus": "Almost Full ({current}/10)",
-    "revealingCards": "Revealing cards..."
+    "revealingCards": "Revealing cards...",
+    "joinedSuccessfully": "Successfully joined the room",
+    "reconnecting": "Reconnecting",
+    "connectionFailed": "Connection failed",
+    "retry": "Retry"
   },
   "signIn": {
     "title": "Sign In",
@@ -68,6 +73,11 @@
     "roomNotFound": "Room not found",
     "userNotFound": "User not found",
     "gameNotFound": "No active game found for this room",
-    "unknownError": "Unknown error"
+    "unknownError": "Unknown error",
+    "invalidCard": "Invalid card value",
+    "cannotStartNewRound": "Cannot start new round - cards are not revealed yet",
+    "cardSelectionFailed": "Failed to select card",
+    "newRoundFailed": "Failed to start new round",
+    "copyFailed": "Failed to copy link to clipboard"
   }
 }

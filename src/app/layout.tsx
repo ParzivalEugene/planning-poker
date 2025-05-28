@@ -4,8 +4,7 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import { ThemeProvider } from "@/components/theme-provider";
-import { I18nProvider } from "@/contexts/I18nContext";
-import { UserProvider } from "@/contexts/UserContext";
+import { I18nProvider, UserProvider } from "@/contexts";
 import { TRPCReactProvider } from "@/trpc/react";
 import { Toaster } from "sonner";
 

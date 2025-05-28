@@ -3,8 +3,8 @@
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useI18n } from "@/contexts/I18nContext";
-import { useUser } from "@/contexts/UserContext";
+import { useI18n, useUser } from "@/contexts";
+
 import { isValidRoomId } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Copy, LogOut } from "lucide-react";
@@ -12,17 +12,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { PlanningTable } from "../_components/PlanningTable";
-
-type RoomState = {
-  players: Array<{
-    id: string;
-    name: string;
-    selectedCard: string | null;
-  }>;
-  isRevealed: boolean;
-  allPlayersVoted: boolean;
-  gameId: string | null;
-};
 
 export default function Page() {
   const params = useParams();

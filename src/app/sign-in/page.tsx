@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useI18n } from "@/contexts/I18nContext";
-import { useUser } from "@/contexts/UserContext";
+import { useI18n, useUser } from "@/contexts";
 import { isValidRoomId } from "@/lib/utils";
 import { Sparkles, Users } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -22,9 +21,8 @@ export default function SignInPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const roomId = searchParams.get("room");
-  const callbackUrl = searchParams.get("callback") || "/";
+  const callbackUrl = searchParams.get("callback") ?? "/";
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (!isLoading && user) {
       if (roomId && isValidRoomId(roomId)) {
@@ -47,20 +45,18 @@ export default function SignInPage() {
       await login(username.trim());
       toast.success(t("signIn.welcomeMessage"));
 
-      // Redirect to room or callback URL
       if (roomId && isValidRoomId(roomId)) {
         router.push(`/room/${roomId}`);
       } else {
         router.push(callbackUrl);
       }
     } catch (error) {
-      // Silent error handling - user will see they're still on the sign-in page
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Show loading while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
@@ -77,7 +73,6 @@ export default function SignInPage() {
     );
   }
 
-  // Don't render form if user is authenticated (will redirect)
   if (user) {
     return null;
   }
@@ -86,14 +81,12 @@ export default function SignInPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5QzkyQUMiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>
 
-      {/* Language Selector */}
       <div className="absolute top-6 right-6 z-10">
         <LanguageSelector />
       </div>
 
       <div className="relative flex min-h-screen items-center justify-center p-6">
         <div className="w-full max-w-md space-y-8">
-          {/* Header */}
           <div className="text-center">
             <div className="flex justify-center">
               <div className="relative">
@@ -119,7 +112,6 @@ export default function SignInPage() {
             </div>
           </div>
 
-          {/* Sign In Form */}
           <Card className="group relative overflow-hidden border-0 bg-white/70 shadow-xl backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl dark:bg-slate-900/70">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
             <CardHeader className="relative">
@@ -163,7 +155,6 @@ export default function SignInPage() {
             </CardContent>
           </Card>
 
-          {/* Room Info */}
           {roomId && isValidRoomId(roomId) && (
             <div className="text-center">
               <div className="inline-block rounded-2xl border border-slate-200/50 bg-white/60 p-4 shadow-lg backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-900/60">
