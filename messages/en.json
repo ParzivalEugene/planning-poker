@@ -25,10 +25,11 @@
       "title": "Join Existing Room",
       "button": "Join Room",
       "placeholder": "abc-defg-jkl",
-      "description": "Enter the 9-character room ID (format: abc-defg-jkl)"
+      "description": "Enter the 9-character room ID"
     },
     "features": {
       "title": "✨ Features:",
+      "subtitle": "Everything you need for effective planning poker sessions",
       "realtime": "• Real-time voting and card reveals",
       "sharing": "• Easy room sharing with readable IDs",
       "rounds": "• Multiple estimation rounds",

@@ -15,20 +15,39 @@ model User {
 }
 
 model Room {
-  id    String @id @default(uuid())
-  name  String
-  users User[] @relation("RoomUsers")
-  games Game[]
+  id            String        @id @default(uuid())
+  name          String
+  users         User[]        @relation("RoomUsers")
+  games         Game[]
+  currentGameId String?       @unique
+  currentGame   Game?         @relation("CurrentGame", fields: [currentGameId], references: [id])
+  history       RoomHistory[]
 }
 
 model Game {
-  id          String     @id @default(uuid())
+  id          String        @id @default(uuid())
   title       String
   description String?
-  isRevealed  Boolean    @default(false)
+  isRevealed  Boolean       @default(false)
   roomId      String
-  room        Room       @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  room        Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
   votes       UserCard[]
+  currentRoom Room?         @relation("CurrentGame")
+  history     RoomHistory[]
+}
+
+model RoomHistory {
+  id        String    @id @default(uuid())
+  roomId    String
+  gameId    String
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  isActive  Boolean   @default(true)
+  room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  game      Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, gameId])
+  @@index([roomId, isActive])
 }
 
 model UserCard {

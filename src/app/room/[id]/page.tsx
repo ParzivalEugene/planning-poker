@@ -9,24 +9,38 @@ import { isValidRoomId } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Copy, LogOut } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { PlanningTable } from "../_components/PlanningTable";
+
+type RoomState = {
+  players: Array<{
+    id: string;
+    name: string;
+    selectedCard: string | null;
+  }>;
+  isRevealed: boolean;
+  allPlayersVoted: boolean;
+  gameId: string | null;
+};
 
 export default function Page() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const { user, logout, isLoading } = useUser();
+  const { user, logout, isLoading, isLoggingOut } = useUser();
   const { t } = useI18n();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [isSelectingCard, setIsSelectingCard] = useState(false);
+  const [connectionRetries, setConnectionRetries] = useState(0);
 
-  const hasJoinedRoom = useRef(false);
+  const hasJoinedRoom = useRef<boolean>(false);
+  const lastEventId = useRef<string | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const cardValues = ["0", "1", "2", "3", "5", "8", "13", "20", "40", "100"];
+  const MAX_RETRIES = 3;
 
-  // Validate room ID format
   useEffect(() => {
     if (id && !isValidRoomId(id)) {
       router.push("/");
@@ -34,159 +48,152 @@ export default function Page() {
     }
   }, [id, router]);
 
-  // Redirect to sign-in if user is not authenticated
   useEffect(() => {
-    if (!isLoading && !user && id && isValidRoomId(id)) {
+    if (!isLoading && !user && !isLoggingOut && id && isValidRoomId(id)) {
       router.push(`/sign-in?room=${id}`);
     }
-  }, [id, user, isLoading, router]);
+  }, [id, user, isLoading, isLoggingOut, router]);
 
-  // Join room mutation
+  const utils = api.useUtils();
+
   const joinRoomMutation = api.poker.joinRoom.useMutation({
-    onSuccess: (data) => {
-      // Immediately update the cache with the returned player data
-      utils.poker.getRoomState.setData({ roomId: id }, (oldData) => ({
-        players: data.players,
-        isRevealed: oldData?.isRevealed ?? false,
-        allPlayersVoted: oldData?.allPlayersVoted ?? false,
-      }));
+    onSuccess: () => {
+      setConnectionRetries(0);
+      toast.success(t("room.joinedSuccessfully"));
+      void utils.poker.getRoomState.invalidate({ roomId: id });
     },
     onError: (error) => {
       const errorMessage = error.message ?? t("errors.unknownError");
+      toast.error(errorMessage);
 
       if (errorMessage.includes("Room is full")) {
-        // Special handling for room full error - redirect to home page
         setTimeout(() => {
           router.push("/");
         }, 1000);
       } else {
-        // Reset the join flag so user can try again
         hasJoinedRoom.current = false;
+
+        if (connectionRetries < MAX_RETRIES) {
+          setConnectionRetries((prev) => prev + 1);
+          setTimeout(
+            () => {
+              if (!hasJoinedRoom.current && user) {
+                hasJoinedRoom.current = true;
+                joinRoomMutation.mutate({
+                  roomId: id,
+                  playerId: user.id,
+                  playerName: user.username,
+                });
+              }
+            },
+            1000 * Math.pow(2, connectionRetries),
+          );
+        }
       }
     },
   });
 
-  // Select card mutation
   const selectCardMutation = api.poker.selectCard.useMutation({
     onSuccess: () => {
-      // Invalidate room state to ensure UI updates
       void utils.poker.getRoomState.invalidate({ roomId: id });
     },
     onError: (error) => {
-      // Reset selected card on error
       setSelectedCard(null);
+      toast.error(error.message ?? t("errors.cardSelectionFailed"));
     },
     onSettled: () => {
-      // Reset selecting state when mutation completes (success or error)
       setIsSelectingCard(false);
     },
   });
 
-  // Start new round mutation
-  const utils = api.useUtils();
   const startNewRoundMutation = api.poker.startNewRound.useMutation({
     onSuccess: () => {
-      // Reset local state immediately
       setSelectedCard(null);
       setIsSelectingCard(false);
-
-      // The subscription will handle the cache update, but we can also
-      // optimistically update the cache here for immediate feedback
-      utils.poker.getRoomState.setData({ roomId: id }, (oldData) =>
-        oldData
-          ? {
-              ...oldData,
-              isRevealed: false,
-              allPlayersVoted: false,
-              players: oldData.players.map((p) => ({
-                ...p,
-                selectedCard: null,
-              })),
-            }
-          : undefined,
-      );
+      toast.success(t("room.newRoundStarted"));
+      void utils.poker.getRoomState.invalidate({ roomId: id });
     },
     onError: (error) => {
-      // Silent error handling
+      toast.error(error.message ?? t("errors.newRoundFailed"));
     },
   });
 
-  // Get room state query
   const { data: roomState, refetch: refetchRoomState } =
     api.poker.getRoomState.useQuery(
       { roomId: id ?? "" },
       {
         enabled: !!id && !!user && isValidRoomId(id),
-        // No polling needed since we have real-time subscriptions
         refetchOnWindowFocus: false,
         refetchOnReconnect: true,
+        retry: (failureCount) => {
+          if (failureCount < 3) {
+            setTimeout(
+              () => void refetchRoomState(),
+              1000 * Math.pow(2, failureCount),
+            );
+            return false;
+          }
+          return false;
+        },
       },
     );
 
-  // Subscribe to room updates
   api.poker.onRoomUpdate.useSubscription(
-    { roomId: id ?? "" },
+    {
+      roomId: id ?? "",
+      lastEventId: lastEventId.current,
+    },
     {
       enabled: !!id && !!user && isValidRoomId(id),
       onData: (data) => {
         console.log("Room update:", data);
+        lastEventId.current = data.id;
 
-        // Handle different event types with proper state management
         switch (data.data.type) {
           case "newRoundStarted":
-            // Reset selected card immediately
             setSelectedCard(null);
             setIsSelectingCard(false);
-
-            // Update cache with new round state
-            utils.poker.getRoomState.setData(
-              { roomId: id },
-              {
-                players: data.data.players,
-                isRevealed: false,
-                allPlayersVoted: false,
-              },
-            );
+            void utils.poker.getRoomState.invalidate({ roomId: id });
             break;
 
           case "cardsRevealed":
-            // Update cache with revealed state
-            if ("isRevealed" in data.data && "allPlayersVoted" in data.data) {
-              utils.poker.getRoomState.setData(
-                { roomId: id },
-                {
-                  players: data.data.players,
-                  isRevealed: data.data.isRevealed ?? true,
-                  allPlayersVoted: data.data.allPlayersVoted ?? true,
-                },
-              );
-            } else {
-              // Fallback to invalidate if event doesn't have complete state
-              void utils.poker.getRoomState.invalidate({ roomId: id });
-            }
+            void utils.poker.getRoomState.invalidate({ roomId: id });
             break;
 
           case "cardSelected":
           case "playerJoined":
-            // For these events, just invalidate to trigger a refetch
+          case "roomState":
             void utils.poker.getRoomState.invalidate({ roomId: id });
             break;
 
           default:
-            // For unknown events, invalidate to be safe
             void utils.poker.getRoomState.invalidate({ roomId: id });
             break;
         }
       },
       onError: (error) => {
         console.error("Subscription error:", error);
+
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+
+        reconnectTimeoutRef.current = setTimeout(() => {
+          console.log("Attempting to reconnect subscription...");
+          void utils.poker.getRoomState.invalidate({ roomId: id });
+        }, 2000);
       },
     },
   );
 
-  // Join room when user logs in and room ID is valid
   useEffect(() => {
-    if (user && id && isValidRoomId(id) && !hasJoinedRoom.current) {
+    if (
+      user &&
+      id &&
+      isValidRoomId(id) &&
+      !hasJoinedRoom.current &&
+      !joinRoomMutation.isPending
+    ) {
       hasJoinedRoom.current = true;
       joinRoomMutation.mutate({
         roomId: id,
@@ -194,24 +201,24 @@ export default function Page() {
         playerName: user.username,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, id]);
+  }, [user?.id, id, joinRoomMutation]);
 
-  // Check if user appears in room after joining, retry if not
   useEffect(() => {
     if (
       user &&
       roomState &&
       hasJoinedRoom.current &&
-      !joinRoomMutation.isPending
+      !joinRoomMutation.isPending &&
+      connectionRetries < MAX_RETRIES
     ) {
       const userInRoom = roomState.players.some((p) => p.id === user.id);
       if (!userInRoom) {
         console.log("User not found in room, retrying join...");
-        // Reset and retry joining
         hasJoinedRoom.current = false;
+        setConnectionRetries((prev) => prev + 1);
+
         setTimeout(() => {
-          if (!hasJoinedRoom.current) {
+          if (!hasJoinedRoom.current && user) {
             hasJoinedRoom.current = true;
             joinRoomMutation.mutate({
               roomId: id,
@@ -219,79 +226,87 @@ export default function Page() {
               playerName: user.username,
             });
           }
-        }, 1000); // Wait 1 second before retrying
+        }, 1000);
       }
     }
-  }, [user, roomState, joinRoomMutation, id]);
+  }, [user, roomState, joinRoomMutation, id, connectionRetries]);
 
-  // Reset selected card when starting a new round or when user has no vote
   useEffect(() => {
-    if (roomState && !roomState.isRevealed) {
-      // Check if the current user has no vote in the current round
-      const currentUser = roomState.players.find((p) => p.id === user?.id);
-      if (currentUser && !currentUser.selectedCard && selectedCard) {
-        // User had a selected card but doesn't have a vote in current round
-        // This means a new round started
-        setSelectedCard(null);
+    if (roomState && user) {
+      const currentUser = roomState.players.find((p) => p.id === user.id);
+
+      if (!roomState.isRevealed) {
+        if (currentUser && !currentUser.selectedCard && selectedCard) {
+          setSelectedCard(null);
+        }
+
+        if (
+          currentUser?.selectedCard &&
+          selectedCard !== currentUser.selectedCard
+        ) {
+          setSelectedCard(currentUser.selectedCard);
+        }
       }
     }
   }, [roomState?.isRevealed, roomState?.players, selectedCard, user?.id]);
 
-  const copyRoomLink = () => {
+  useEffect(() => {
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const copyRoomLink = useCallback(() => {
     const roomLink = `${window.location.origin}/room/${id}`;
-    navigator.clipboard.writeText(roomLink).catch(() => {
-      // Silent error handling
-    });
-  };
+    navigator.clipboard
+      .writeText(roomLink)
+      .then(() => {
+        toast.success(t("room.linkCopied"));
+      })
+      .catch(() => {
+        toast.error(t("errors.copyFailed"));
+      });
+  }, [id, t]);
 
-  const handleCardSelect = (value: string) => {
-    if (!user) {
-      return;
-    }
+  const handleCardSelect = useCallback(
+    (value: string) => {
+      if (!user || isSelectingCard || roomState?.isRevealed) {
+        return;
+      }
 
-    // Prevent rapid clicking
-    if (isSelectingCard) {
-      return;
-    }
+      setSelectedCard(value);
+      setIsSelectingCard(true);
 
-    // Check if cards are revealed - use the most up-to-date state
-    if (roomState?.isRevealed) {
-      return;
-    }
+      selectCardMutation.mutate({
+        roomId: id,
+        playerId: user.id,
+        cardValue: value,
+      });
+    },
+    [user, isSelectingCard, roomState?.isRevealed, selectCardMutation, id],
+  );
 
-    // Optimistically update the selected card and set selecting state
-    setSelectedCard(value);
-    setIsSelectingCard(true);
-
-    selectCardMutation.mutate({
-      roomId: id,
-      playerId: user.id,
-      cardValue: value,
-    });
-  };
-
-  const handleStartNewRound = () => {
+  const handleStartNewRound = useCallback(() => {
     startNewRoundMutation.mutate({
       roomId: id,
     });
-  };
+  }, [startNewRoundMutation, id]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     toast.success(t("room.loggedOut"));
     logout();
-  };
+  }, [logout, t]);
 
-  // Show loading or redirect if not authenticated
   if (!id || !isValidRoomId(id)) {
-    return null; // Will redirect
+    return null;
   }
 
-  // Show nothing for non-authenticated users (will redirect to sign-in)
   if (!user) {
     return null;
   }
 
-  // Show loading state while user context is still loading
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -304,6 +319,7 @@ export default function Page() {
   }
 
   const players = roomState?.players ?? [];
+  const currentUser = players.find((p) => p.id === user.id);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -324,7 +340,13 @@ export default function Page() {
                 {t("common.players")}
               </div>
               <div
-                className={`text-sm font-medium ${players.length >= 10 ? "text-red-500" : players.length >= 8 ? "text-yellow-500" : "text-green-500"}`}
+                className={`text-sm font-medium ${
+                  players.length >= 10
+                    ? "text-red-500"
+                    : players.length >= 8
+                      ? "text-yellow-500"
+                      : "text-green-500"
+                }`}
               >
                 {players.length}/10
               </div>
@@ -382,7 +404,9 @@ export default function Page() {
                   (roomState?.isRevealed ?? false) ||
                   isSelectingCard;
                 const isSelected =
-                  selectedCard === value && !roomState?.isRevealed;
+                  (selectedCard === value ||
+                    currentUser?.selectedCard === value) &&
+                  !roomState?.isRevealed;
 
                 return (
                   <button
@@ -396,7 +420,11 @@ export default function Page() {
                         isSelected
                           ? "border-primary bg-primary/10 border-2"
                           : ""
-                      } ${isDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                      } ${
+                        isDisabled
+                          ? "cursor-not-allowed opacity-50"
+                          : "cursor-pointer"
+                      }`}
                     >
                       <CardContent className="flex h-full items-center justify-center p-0">
                         <span className="font-bold">{value}</span>
@@ -423,6 +451,34 @@ export default function Page() {
                       {t("room.capacityFull").split("{contactLink}")[1]}
                     </span>
                   )}
+                </p>
+              </div>
+            )}
+
+            {/* Connection status indicator */}
+            {connectionRetries > 0 && connectionRetries < MAX_RETRIES && (
+              <div className="mt-2 text-center">
+                <p className="text-xs text-yellow-600">
+                  {t("room.reconnecting")} ({connectionRetries}/{MAX_RETRIES})
+                </p>
+              </div>
+            )}
+
+            {connectionRetries >= MAX_RETRIES && (
+              <div className="mt-2 text-center">
+                <p className="text-xs text-red-600">
+                  {t("room.connectionFailed")}
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="ml-2 h-auto p-0 text-xs"
+                    onClick={() => {
+                      setConnectionRetries(0);
+                      hasJoinedRoom.current = false;
+                    }}
+                  >
+                    {t("room.retry")}
+                  </Button>
                 </p>
               </div>
             )}

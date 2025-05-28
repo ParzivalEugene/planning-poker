@@ -1,6 +1,7 @@
 "use client";
 
 import { api } from "@/trpc/react";
+import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type User = {
@@ -11,6 +12,7 @@ export type User = {
 type UserContextType = {
   user: User | null;
   isLoading: boolean;
+  isLoggingOut: boolean;
   login: (username: string) => Promise<void>;
   logout: () => void;
 };
@@ -22,14 +24,14 @@ const USER_STORAGE_KEY = "poker-planning-user";
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const router = useRouter();
   const loginMutation = api.auth.login.useMutation();
   const userQuery = api.auth.getCurrentUser.useQuery(
     { userId: user?.id },
     { enabled: !!user?.id },
   );
 
-  // Load user from local storage on mount
   useEffect(() => {
     const storedUser = localStorage.getItem(USER_STORAGE_KEY);
     if (storedUser) {
@@ -43,7 +45,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  // Update local storage when user changes
   useEffect(() => {
     if (user) {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
@@ -51,8 +52,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem(USER_STORAGE_KEY);
     }
   }, [user, isLoading]);
-
-  // Refresh user data if needed from the server
   useEffect(() => {
     if (
       userQuery.data === null &&
@@ -61,8 +60,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       !userQuery.isError &&
       !loginMutation.isPending
     ) {
-      // User exists in localStorage but not on server (server restart)
-      // Re-register the user automatically
       console.log("User not found on server, re-registering:", user.username);
       loginMutation.mutate({ username: user.username });
     }
@@ -86,13 +83,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    setIsLoggingOut(true);
     setUser(null);
-    // Clear from local storage
     localStorage.removeItem(USER_STORAGE_KEY);
+    router.push("/");
   };
 
   return (
-    <UserContext.Provider value={{ user, isLoading, login, logout }}>
+    <UserContext.Provider
+      value={{ user, isLoading, isLoggingOut, login, logout }}
+    >
       {children}
     </UserContext.Provider>
   );
