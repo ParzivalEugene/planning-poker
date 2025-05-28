@@ -309,10 +309,15 @@ export default function Page() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="border-primary mx-auto h-8 w-8 animate-spin rounded-full border-b-2"></div>
-          <p className="text-muted-foreground mt-2">{t("common.loading")}</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5QzkyQUMiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>
+        <div className="relative flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-slate-600 dark:text-slate-300">
+              {t("common.loading")}
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -322,169 +327,195 @@ export default function Page() {
   const currentUser = players.find((p) => p.id === user.id);
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="bg-card/50 w-full border-b backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary flex h-8 w-8 items-center justify-center rounded-md">
-              <span className="text-primary-foreground font-bold">PP</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5QzkyQUMiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>
+
+      <div className="relative flex min-h-screen flex-col">
+        <header className="border-b border-white/20 bg-white/60 backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-900/60">
+          <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 shadow-lg ring-1 ring-white/20">
+                  <span className="text-lg font-bold text-white">PP</span>
+                </div>
+              </div>
+
+              <span className="mr-8 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text font-semibold text-transparent dark:from-white dark:via-blue-100 dark:to-indigo-100">
+                {t("home.title")}
+              </span>
+              <LanguageSelector />
             </div>
 
-            <span className="mr-8 font-semibold">{t("home.title")}</span>
-            <LanguageSelector />
+            <div className="flex items-center gap-4">
+              <div className="text-center">
+                <div className="text-xs text-slate-600 dark:text-slate-400">
+                  {t("common.players")}
+                </div>
+                <div
+                  className={`text-sm font-medium ${
+                    players.length >= 10
+                      ? "text-red-500"
+                      : players.length >= 8
+                        ? "text-yellow-500"
+                        : "text-green-500"
+                  }`}
+                >
+                  {players.length}/10
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-slate-600 dark:text-slate-400">
+                  {t("common.roomId")}
+                </div>
+                <div className="font-mono text-sm font-medium text-slate-800 dark:text-slate-200">
+                  {id}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={copyRoomLink}
+                  className="bg-emerald-500 shadow-lg transition-all duration-300 hover:bg-emerald-600 hover:shadow-xl"
+                >
+                  <Copy size={16} className="mr-1" />
+                  {t("common.copy")}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleLogout}
+                  title={t("common.logout")}
+                  className="border-slate-200/50 bg-white/50 backdrop-blur-sm transition-all duration-300 hover:bg-white/80 hover:shadow-lg dark:border-slate-700/50 dark:bg-slate-900/50 dark:hover:bg-slate-900/80"
+                >
+                  <LogOut size={16} />
+                </Button>
+              </div>
+            </div>
           </div>
+        </header>
 
-          <div className="flex items-center gap-4">
-            <div className="text-center">
-              <div className="text-muted-foreground text-xs">
-                {t("common.players")}
-              </div>
-              <div
-                className={`text-sm font-medium ${
-                  players.length >= 10
-                    ? "text-red-500"
-                    : players.length >= 8
-                      ? "text-yellow-500"
-                      : "text-green-500"
-                }`}
-              >
-                {players.length}/10
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-muted-foreground text-xs">
-                {t("common.roomId")}
-              </div>
-              <div className="font-mono text-sm font-medium">{id}</div>
-            </div>
-
-            <div className="flex gap-2">
-              <Button onClick={copyRoomLink}>
-                <Copy size={16} className="mr-1" />
-                {t("common.copy")}
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleLogout}
-                title={t("common.logout")}
-              >
-                <LogOut size={16} />
-              </Button>
-            </div>
+        <div className="flex flex-1 items-center justify-center p-3 sm:p-4 md:p-6 lg:p-8">
+          <div className="mx-auto flex h-full w-full items-center justify-center">
+            <PlanningTable
+              players={players}
+              title={t("room.title")}
+              isRevealed={roomState?.isRevealed ?? false}
+              onStartNewRound={handleStartNewRound}
+              isStartingNewRound={startNewRoundMutation.isPending}
+            />
           </div>
         </div>
-      </header>
 
-      <div className="flex flex-1 items-center justify-center p-3 sm:p-4 md:p-6 lg:p-8">
-        <div className="mx-auto flex h-full w-full items-center justify-center">
-          <PlanningTable
-            players={players}
-            title={t("room.title")}
-            isRevealed={roomState?.isRevealed ?? false}
-            onStartNewRound={handleStartNewRound}
-            isStartingNewRound={startNewRoundMutation.isPending}
-          />
-        </div>
-      </div>
+        <footer className="border-t border-white/20 bg-white/60 px-3 py-3 backdrop-blur-sm sm:px-4 sm:py-4 md:px-6 dark:border-slate-700/50 dark:bg-slate-900/60">
+          <div className="container mx-auto">
+            <div className="flex flex-col gap-2">
+              <p className="mb-1 text-center text-xs text-slate-600 sm:mb-2 sm:text-sm dark:text-slate-400">
+                {roomState?.isRevealed
+                  ? t("room.cardsRevealedFooter")
+                  : t("room.availableCards")}
+              </p>
+              <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-1.5 sm:gap-2">
+                {cardValues.map((value) => {
+                  const isDisabled =
+                    selectCardMutation.isPending ||
+                    (roomState?.isRevealed ?? false) ||
+                    isSelectingCard;
+                  const isSelected =
+                    (selectedCard === value ||
+                      currentUser?.selectedCard === value) &&
+                    !roomState?.isRevealed;
 
-      <footer className="bg-background border-t px-3 py-3 sm:px-4 sm:py-4 md:px-6">
-        <div className="container mx-auto">
-          <div className="flex flex-col gap-2">
-            <p className="text-muted-foreground mb-1 text-center text-xs sm:mb-2 sm:text-sm">
-              {roomState?.isRevealed
-                ? t("room.cardsRevealedFooter")
-                : t("room.availableCards")}
-            </p>
-            <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-1.5 sm:gap-2">
-              {cardValues.map((value) => {
-                const isDisabled =
-                  selectCardMutation.isPending ||
-                  (roomState?.isRevealed ?? false) ||
-                  isSelectingCard;
-                const isSelected =
-                  (selectedCard === value ||
-                    currentUser?.selectedCard === value) &&
-                  !roomState?.isRevealed;
-
-                return (
-                  <button
-                    key={value}
-                    className="group relative"
-                    onClick={() => handleCardSelect(value)}
-                    disabled={isDisabled}
-                  >
-                    <Card
-                      className={`group-hover:border-primary flex h-14 w-10 items-center justify-center transition-all hover:scale-110 hover:shadow-md sm:h-16 sm:w-12 ${
-                        isSelected
-                          ? "border-primary bg-primary/10 border-2"
-                          : ""
-                      } ${
-                        isDisabled
-                          ? "cursor-not-allowed opacity-50"
-                          : "cursor-pointer"
-                      }`}
+                  return (
+                    <button
+                      key={value}
+                      className="group relative"
+                      onClick={() => handleCardSelect(value)}
+                      disabled={isDisabled}
                     >
-                      <CardContent className="flex h-full items-center justify-center p-0">
-                        <span className="font-bold">{value}</span>
-                      </CardContent>
-                    </Card>
-                  </button>
-                );
-              })}
-            </div>
-
-            {players.length >= 8 && (
-              <div className="mt-2 text-center">
-                <p className="text-muted-foreground text-xs">
-                  {t("room.capacityWarning", { current: players.length })}
-                  {players.length >= 10 && (
-                    <span className="mt-1 block text-yellow-600">
-                      {t("room.capacityFull").split("{contactLink}")[0]}
-                      <a
-                        href="mailto:contact@michkoff.com"
-                        className="underline hover:text-yellow-500"
+                      <Card
+                        className={`group relative flex h-14 w-10 items-center justify-center overflow-hidden border-0 bg-white/70 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:h-16 sm:w-12 dark:bg-slate-900/70 ${
+                          isSelected
+                            ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-transparent"
+                            : ""
+                        } ${
+                          isDisabled
+                            ? "cursor-not-allowed opacity-50"
+                            : "cursor-pointer"
+                        }`}
                       >
-                        contact@michkoff.com
-                      </a>
-                      {t("room.capacityFull").split("{contactLink}")[1]}
-                    </span>
-                  )}
-                </p>
+                        {!isDisabled && (
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                        )}
+                        <CardContent className="relative flex h-full items-center justify-center p-0">
+                          <span className="font-bold text-slate-800 dark:text-slate-200">
+                            {value}
+                          </span>
+                        </CardContent>
+                      </Card>
+                    </button>
+                  );
+                })}
               </div>
-            )}
 
-            {/* Connection status indicator */}
-            {connectionRetries > 0 && connectionRetries < MAX_RETRIES && (
-              <div className="mt-2 text-center">
-                <p className="text-xs text-yellow-600">
-                  {t("room.reconnecting")} ({connectionRetries}/{MAX_RETRIES})
-                </p>
-              </div>
-            )}
+              {players.length >= 8 && (
+                <div className="mt-2 text-center">
+                  <div className="inline-block rounded-xl border border-slate-200/50 bg-white/60 p-3 shadow-lg backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-900/60">
+                    <p className="text-xs text-slate-600 dark:text-slate-300">
+                      {t("room.capacityWarning", { current: players.length })}
+                      {players.length >= 10 && (
+                        <span className="mt-1 block text-yellow-600 dark:text-yellow-400">
+                          {t("room.capacityFull").split("{contactLink}")[0]}
+                          <a
+                            href="mailto:contact@michkoff.com"
+                            className="font-medium underline decoration-2 underline-offset-2 transition-colors duration-200 hover:text-yellow-700 hover:decoration-yellow-600 dark:hover:text-yellow-300 dark:hover:decoration-yellow-400"
+                          >
+                            contact@michkoff.com
+                          </a>
+                          {t("room.capacityFull").split("{contactLink}")[1]}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              )}
 
-            {connectionRetries >= MAX_RETRIES && (
-              <div className="mt-2 text-center">
-                <p className="text-xs text-red-600">
-                  {t("room.connectionFailed")}
-                  <Button
-                    variant="link"
-                    size="sm"
-                    className="ml-2 h-auto p-0 text-xs"
-                    onClick={() => {
-                      setConnectionRetries(0);
-                      hasJoinedRoom.current = false;
-                    }}
-                  >
-                    {t("room.retry")}
-                  </Button>
-                </p>
-              </div>
-            )}
+              {/* Connection status indicator */}
+              {connectionRetries > 0 && connectionRetries < MAX_RETRIES && (
+                <div className="mt-2 text-center">
+                  <div className="inline-block rounded-xl border border-yellow-200/50 bg-yellow-50/60 p-3 shadow-lg backdrop-blur-sm dark:border-yellow-800/50 dark:bg-yellow-950/60">
+                    <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                      {t("room.reconnecting")} ({connectionRetries}/
+                      {MAX_RETRIES})
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {connectionRetries >= MAX_RETRIES && (
+                <div className="mt-2 text-center">
+                  <div className="inline-block rounded-xl border border-red-200/50 bg-red-50/60 p-3 shadow-lg backdrop-blur-sm dark:border-red-800/50 dark:bg-red-950/60">
+                    <p className="text-xs text-red-700 dark:text-red-300">
+                      {t("room.connectionFailed")}
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="ml-2 h-auto p-0 text-xs text-red-700 hover:text-red-800 dark:text-red-300 dark:hover:text-red-200"
+                        onClick={() => {
+                          setConnectionRetries(0);
+                          hasJoinedRoom.current = false;
+                        }}
+                      >
+                        {t("room.retry")}
+                      </Button>
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }

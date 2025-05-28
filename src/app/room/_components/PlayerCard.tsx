@@ -33,25 +33,36 @@ export function PlayerCard({
       className={`flex flex-col items-center ${position ? positionClasses[position] : ""} ${className}`}
     >
       <Card
-        className={`xs:h-22 xs:w-16 mb-2 flex h-20 w-14 items-center justify-center transition-transform hover:scale-105 sm:h-24 sm:w-18 ${isEmpty ? "border-muted bg-muted/5 border-2 border-dashed" : ""} `}
+        className={`xs:h-22 xs:w-16 group relative mb-2 flex h-20 w-14 items-center justify-center overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:h-24 sm:w-18 ${
+          isEmpty
+            ? "border-0 border-dashed bg-white/30 shadow-lg backdrop-blur-sm dark:bg-slate-900/30"
+            : "border-0 bg-white/70 shadow-xl backdrop-blur-sm dark:bg-slate-900/70"
+        }`}
       >
-        <CardContent className="flex h-full items-center justify-center p-0">
+        {!isEmpty && (
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+        )}
+        <CardContent className="relative flex h-full items-center justify-center p-0">
           {!isEmpty && player?.selectedCard && isRevealed && (
-            <span className="xs:text-2xl text-xl font-bold sm:text-3xl">
+            <span className="xs:text-2xl text-xl font-bold text-slate-800 sm:text-3xl dark:text-slate-200">
               {player.selectedCard}
             </span>
           )}
           {!isEmpty && player?.selectedCard && !isRevealed && (
-            <span className="text-muted-foreground text-3xl">✅</span>
+            <span className="text-3xl">✅</span>
           )}
           {!isEmpty && !player?.selectedCard && (
-            <span className="text-muted-foreground text-3xl">🤔</span>
+            <span className="text-3xl">🤔</span>
           )}
         </CardContent>
       </Card>
 
       <span
-        className={`text-xs font-medium sm:text-sm ${isEmpty ? "text-muted-foreground" : ""} max-w-[80px] truncate`}
+        className={`text-xs font-medium sm:text-sm ${
+          isEmpty
+            ? "text-slate-500 dark:text-slate-400"
+            : "text-slate-700 dark:text-slate-300"
+        } max-w-[80px] truncate`}
       >
         {isEmpty ? t("room.emptySeat") : player.name}
       </span>

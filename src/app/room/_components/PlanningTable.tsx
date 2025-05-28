@@ -113,53 +113,58 @@ export function PlanningTable({
 
         {/* Center table - constrained to not take over the screen */}
         <div className="w-full max-w-[380px] flex-1 px-2 sm:px-3 md:px-4 lg:max-w-[450px] lg:px-5 xl:max-w-[500px]">
-          <div className="bg-card z-10 mx-auto flex aspect-[3/2] w-full flex-col items-center justify-center rounded-xl border p-4 shadow-lg sm:aspect-[4/3] md:aspect-[5/3]">
-            <h2 className="text-card-foreground mb-2 text-lg font-bold sm:text-xl md:text-2xl">
-              {title}
-            </h2>
-            {players.length > 0 && (
-              <div className="text-center">
-                {players.length >= 9 && (
-                  <div
-                    className={`mb-2 text-xs font-medium ${players.length >= 10 ? "text-red-600" : "text-yellow-600"}`}
-                  >
-                    {players.length >= 10
-                      ? t("room.roomFullStatus")
-                      : t("room.almostFullStatus", { current: players.length })}
-                  </div>
-                )}
-                {isRevealed ? (
-                  <div className="space-y-3">
-                    <div className="font-medium text-green-600">
-                      {t("room.cardsRevealedStatus")}
+          <div className="group relative mx-auto flex aspect-[3/2] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-0 bg-white/70 p-4 shadow-xl backdrop-blur-sm transition-all duration-300 sm:aspect-[4/3] md:aspect-[5/3] dark:bg-slate-900/70">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 transition-opacity duration-300"></div>
+            <div className="relative z-10 text-center">
+              <h2 className="mb-2 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-lg font-bold text-transparent sm:text-xl md:text-2xl dark:from-white dark:via-blue-100 dark:to-indigo-100">
+                {title}
+              </h2>
+              {players.length > 0 && (
+                <div className="text-center">
+                  {players.length >= 9 && (
+                    <div
+                      className={`mb-2 text-xs font-medium ${players.length >= 10 ? "text-red-600 dark:text-red-400" : "text-yellow-600 dark:text-yellow-400"}`}
+                    >
+                      {players.length >= 10
+                        ? t("room.roomFullStatus")
+                        : t("room.almostFullStatus", {
+                            current: players.length,
+                          })}
                     </div>
-                    {onStartNewRound && (
-                      <Button
-                        onClick={onStartNewRound}
-                        variant="outline"
-                        disabled={isStartingNewRound}
-                        className="cursor-pointer"
-                      >
-                        {t("room.startNewRound")}
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-muted-foreground text-sm">
-                    {t("room.votingStatus", {
-                      voted: players.filter((p) => p.selectedCard).length,
-                      total: players.length,
-                    })}
-                    {players.every((p) => p.selectedCard) &&
-                      players.length > 0 && (
-                        <div className="mt-1 font-medium text-blue-600">
-                          {t("room.revealingCards")}
-                        </div>
+                  )}
+                  {isRevealed ? (
+                    <div className="space-y-3">
+                      <div className="font-medium text-green-600 dark:text-green-400">
+                        {t("room.cardsRevealedStatus")}
+                      </div>
+                      {onStartNewRound && (
+                        <Button
+                          onClick={onStartNewRound}
+                          variant="outline"
+                          disabled={isStartingNewRound}
+                          className="cursor-pointer border-emerald-200 bg-white/50 text-emerald-700 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-lg dark:border-emerald-800 dark:bg-slate-900/50 dark:text-emerald-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/30"
+                        >
+                          {t("room.startNewRound")}
+                        </Button>
                       )}
-                  </div>
-                )}
-              </div>
-            )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-slate-600 dark:text-slate-300">
+                      {t("room.votingStatus", {
+                        voted: players.filter((p) => p.selectedCard).length,
+                        total: players.length,
+                      })}
+                      {players.every((p) => p.selectedCard) &&
+                        players.length > 0 && (
+                          <div className="mt-1 font-medium text-blue-600 dark:text-blue-400">
+                            {t("room.revealingCards")}
+                          </div>
+                        )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
