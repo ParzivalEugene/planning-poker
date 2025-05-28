@@ -18,8 +18,8 @@ export function LanguageSelector() {
 
   return (
     <Button variant="outline" size="sm" onClick={toggleLocale}>
-      <Globe className="mr-2 h-4 w-4" />
-      {languages[locale].flag} {languages[locale].name}
+      <Globe className="h-4 w-4" />
+      {languages[locale].name}
     </Button>
   );
 }

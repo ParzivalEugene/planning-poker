@@ -38,7 +38,7 @@
     }
   },
   "room": {
-    "title": "Planning Poker Session",
+    "title": "Planning Poker",
     "roomFull": "Room is full (maximum 10 players). For enterprise solutions with higher capacity, please contact contact@michkoff.com to discuss partnership opportunities.",
     "loggedOut": "Logged out successfully",
     "cardsRevealedFooter": "Cards Revealed - Start New Round to Vote Again",

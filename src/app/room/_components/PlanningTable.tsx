@@ -138,7 +138,7 @@ export function PlanningTable({
                         onClick={onStartNewRound}
                         variant="outline"
                         disabled={isStartingNewRound}
-                        size="sm"
+                        className="cursor-pointer"
                       >
                         {t("room.startNewRound")}
                       </Button>
