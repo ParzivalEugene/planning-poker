@@ -33,7 +33,13 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <UserProvider>{children}</UserProvider>
-              <Toaster position="bottom-right" />
+              <Toaster
+                position="bottom-right"
+                toastOptions={{
+                  className: "mobile-toast",
+                }}
+                className="mobile-toaster"
+              />
             </ThemeProvider>
           </TRPCReactProvider>
         </I18nProvider>

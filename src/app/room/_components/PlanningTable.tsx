@@ -84,9 +84,9 @@ export function PlanningTable({
   );
 
   return (
-    <div className="w-full max-w-[95vw] sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] xl:max-w-[60vw] 2xl:max-w-[50vw]">
-      {/* Top row of players */}
-      <div className="flex justify-center gap-3 sm:gap-6 md:gap-8 lg:gap-10">
+    <div className="container-responsive">
+      {/* Top row of players - responsive spacing */}
+      <div className="gap-responsive-md flex justify-center">
         {topPlayers.map((item, index) => (
           <PlayerCard
             key={`top-${index}`}
@@ -97,10 +97,10 @@ export function PlanningTable({
         ))}
       </div>
 
-      {/* Middle section with table and side players */}
+      {/* Middle section with table and side players - responsive layout */}
       <div className="flex items-center justify-center">
-        {/* Left column players */}
-        <div className="mr-2 flex flex-col space-y-4 sm:mr-4 md:mr-6 md:space-y-8 lg:mr-5 lg:space-y-12">
+        {/* Left column players - responsive spacing */}
+        <div className="spacing-responsive-md mr-1 flex flex-col sm:mr-2 md:mr-4 lg:mr-6 xl:mr-8">
           {leftPlayers.map((item, index) => (
             <PlayerCard
               key={`left-${index}`}
@@ -111,65 +111,69 @@ export function PlanningTable({
           ))}
         </div>
 
-        {/* Center table - constrained to not take over the screen */}
-        <div className="w-full max-w-[380px] flex-1 px-2 sm:px-3 md:px-4 lg:max-w-[450px] lg:px-5 xl:max-w-[500px]">
-          <div className="group relative mx-auto flex aspect-[3/2] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-0 bg-white/70 p-4 shadow-xl backdrop-blur-sm transition-all duration-300 sm:aspect-[4/3] md:aspect-[5/3] dark:bg-slate-900/70">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 transition-opacity duration-300"></div>
-            <div className="relative z-10 text-center">
-              <h2 className="mb-2 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-lg font-bold text-transparent sm:text-xl md:text-2xl dark:from-white dark:via-blue-100 dark:to-indigo-100">
-                {title}
-              </h2>
-              {players.length > 0 && (
-                <div className="text-center">
-                  {players.length >= 9 && (
-                    <div
-                      className={`mb-2 text-xs font-medium ${players.length >= 10 ? "text-red-600 dark:text-red-400" : "text-yellow-600 dark:text-yellow-400"}`}
-                    >
-                      {players.length >= 10
-                        ? t("room.roomFullStatus")
-                        : t("room.almostFullStatus", {
-                            current: players.length,
-                          })}
-                    </div>
-                  )}
-                  {isRevealed ? (
-                    <div className="space-y-3">
-                      <div className="font-medium text-green-600 dark:text-green-400">
-                        {t("room.cardsRevealedStatus")}
+        {/* Center table - responsive sizing and content */}
+        <div className="w-full max-w-[280px] flex-1 px-1 sm:max-w-[320px] sm:px-2 md:max-w-[380px] md:px-3 lg:max-w-[450px] lg:px-4 xl:max-w-[500px] xl:px-5">
+          <div className="group padding-responsive-md relative mx-auto flex w-full flex-col items-center justify-center overflow-hidden rounded-xl border-0 bg-white/70 shadow-xl backdrop-blur-sm transition-all duration-300 sm:rounded-2xl dark:bg-slate-900/70">
+            {/* Responsive aspect ratio */}
+            <div className="aspect-[4/3] w-full sm:aspect-[3/2] md:aspect-[5/3] lg:aspect-[16/9]">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 transition-opacity duration-300"></div>
+              <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
+                <h2 className="text-responsive-lg high-dpi-text mb-2 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text font-bold text-transparent sm:mb-3 dark:from-white dark:via-blue-100 dark:to-indigo-100">
+                  {title}
+                </h2>
+                {players.length > 0 && (
+                  <div className="text-center">
+                    {players.length >= 9 && (
+                      <div
+                        className={`text-responsive-xs mb-2 font-medium ${players.length >= 10 ? "text-red-600 dark:text-red-400" : "text-yellow-600 dark:text-yellow-400"}`}
+                      >
+                        {players.length >= 10
+                          ? t("room.roomFullStatus")
+                          : t("room.almostFullStatus", {
+                              current: players.length,
+                            })}
                       </div>
-                      {onStartNewRound && (
-                        <Button
-                          onClick={onStartNewRound}
-                          variant="outline"
-                          disabled={isStartingNewRound}
-                          className="cursor-pointer border-emerald-200 bg-white/50 text-emerald-700 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-lg dark:border-emerald-800 dark:bg-slate-900/50 dark:text-emerald-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/30"
-                        >
-                          {t("room.startNewRound")}
-                        </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-sm text-slate-600 dark:text-slate-300">
-                      {t("room.votingStatus", {
-                        voted: players.filter((p) => p.selectedCard).length,
-                        total: players.length,
-                      })}
-                      {players.every((p) => p.selectedCard) &&
-                        players.length > 0 && (
-                          <div className="mt-1 font-medium text-blue-600 dark:text-blue-400">
-                            {t("room.revealingCards")}
-                          </div>
+                    )}
+                    {isRevealed ? (
+                      <div className="spacing-responsive-sm">
+                        <div className="text-responsive-sm font-medium text-green-600 dark:text-green-400">
+                          {t("room.cardsRevealedStatus")}
+                        </div>
+                        {onStartNewRound && (
+                          <Button
+                            onClick={onStartNewRound}
+                            variant="outline"
+                            size="sm"
+                            disabled={isStartingNewRound}
+                            className="touch-target text-responsive-xs cursor-pointer border-emerald-200 bg-white/50 text-emerald-700 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-lg dark:border-emerald-800 dark:bg-slate-900/50 dark:text-emerald-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/30"
+                          >
+                            {t("room.startNewRound")}
+                          </Button>
                         )}
-                    </div>
-                  )}
-                </div>
-              )}
+                      </div>
+                    ) : (
+                      <div className="text-responsive-xs text-slate-600 dark:text-slate-300">
+                        {t("room.votingStatus", {
+                          voted: players.filter((p) => p.selectedCard).length,
+                          total: players.length,
+                        })}
+                        {players.every((p) => p.selectedCard) &&
+                          players.length > 0 && (
+                            <div className="text-responsive-xs mt-1 font-medium text-blue-600 dark:text-blue-400">
+                              {t("room.revealingCards")}
+                            </div>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right column players */}
-        <div className="ml-2 flex flex-col space-y-4 sm:ml-4 md:ml-6 md:space-y-8 lg:ml-5 lg:space-y-12">
+        {/* Right column players - responsive spacing */}
+        <div className="spacing-responsive-md ml-1 flex flex-col sm:ml-2 md:ml-4 lg:ml-6 xl:ml-8">
           {rightPlayers.map((item, index) => (
             <PlayerCard
               key={`right-${index}`}
@@ -181,8 +185,8 @@ export function PlanningTable({
         </div>
       </div>
 
-      {/* Bottom row of players */}
-      <div className="flex justify-center gap-3 sm:gap-6 md:gap-8 lg:gap-10">
+      {/* Bottom row of players - responsive spacing */}
+      <div className="gap-responsive-md flex justify-center">
         {bottomPlayers.map((item, index) => (
           <PlayerCard
             key={`bottom-${index}`}

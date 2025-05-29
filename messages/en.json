@@ -48,6 +48,7 @@
     "capacityWarning": "Room capacity: {current}/10 players",
     "capacityFull": "Need more capacity? Contact {contactLink} for partnership opportunities 💰",
     "startNewRound": "Start New Round",
+    "newRoundStarted": "New round started",
     "emptySeat": "Empty seat",
     "votingStatus": "{voted}/{total} players voted",
     "cardsRevealedStatus": "Cards Revealed!",

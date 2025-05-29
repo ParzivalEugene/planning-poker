@@ -4,7 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
@@ -121,5 +122,139 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Responsive and mobile optimizations */
+@layer utilities {
+  /* Better touch targets for mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Responsive text scaling */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  /* Responsive spacing */
+  .spacing-responsive-sm {
+    @apply space-y-2 sm:space-y-3 md:space-y-4;
+  }
+
+  .spacing-responsive-md {
+    @apply space-y-3 sm:space-y-4 md:space-y-6;
+  }
+
+  .spacing-responsive-lg {
+    @apply space-y-4 sm:space-y-6 md:space-y-8;
+  }
+
+  /* Responsive padding */
+  .padding-responsive-sm {
+    @apply p-2 sm:p-3 md:p-4;
+  }
+
+  .padding-responsive-md {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+
+  .padding-responsive-lg {
+    @apply p-4 sm:p-6 md:p-8;
+  }
+
+  /* Responsive margins */
+  .margin-responsive-sm {
+    @apply m-2 sm:m-3 md:m-4;
+  }
+
+  .margin-responsive-md {
+    @apply m-3 sm:m-4 md:m-6;
+  }
+
+  /* Mobile-first container */
+  .container-responsive {
+    @apply mx-auto w-full max-w-[95vw] px-2 sm:max-w-[90vw] sm:px-4 md:max-w-[85vw] md:px-6 lg:max-w-[80vw] lg:px-8 xl:max-w-[75vw] 2xl:max-w-[70vw];
+  }
+
+  /* Responsive grid gaps */
+  .gap-responsive-sm {
+    @apply gap-1 sm:gap-2 md:gap-3;
+  }
+
+  .gap-responsive-md {
+    @apply gap-2 sm:gap-4 md:gap-6;
+  }
+
+  .gap-responsive-lg {
+    @apply gap-3 sm:gap-6 md:gap-8 lg:gap-10;
+  }
+}
+
+/* Mobile landscape optimizations */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .mobile-landscape-compact {
+    @apply py-1;
+  }
+
+  .mobile-landscape-compact .planning-table {
+    @apply scale-90;
+  }
+
+  .mobile-landscape-compact .card-selection {
+    @apply py-2;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi-text {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Mobile toast positioning */
+@media (max-width: 768px) {
+  .mobile-toaster {
+    top: 10rem !important;
+    bottom: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: calc(100vw - 2rem) !important;
+    max-width: 400px !important;
+  }
+
+  .mobile-toast {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure toasts stack properly on mobile */
+  .mobile-toaster > * {
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Adjust toast content for mobile */
+  .mobile-toast > div {
+    text-align: center !important;
+    padding: 0.75rem 1rem !important;
   }
 }
