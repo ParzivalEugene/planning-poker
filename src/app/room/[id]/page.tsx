@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n, useUser } from "@/contexts";
 
+import { useSaluteAssistant } from "@/hooks/useSaluteAssistant";
 import { isValidRoomId } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Copy, LogOut } from "lucide-react";
@@ -287,6 +288,17 @@ export default function Page() {
     toast.success(t("room.loggedOut"));
     logout();
   }, [logout, t]);
+
+  useSaluteAssistant({
+    roomId: id,
+    players: roomState?.players ?? [],
+    isRevealed: roomState?.isRevealed ?? false,
+    allPlayersVoted:
+      (roomState?.players ?? []).every((p) => p.selectedCard !== null) &&
+      (roomState?.players ?? []).length > 0,
+    onSelectCard: handleCardSelect,
+    onStartNewRound: handleStartNewRound,
+  });
 
   if (!id || !isValidRoomId(id)) {
     return null;

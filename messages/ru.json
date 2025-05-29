@@ -57,7 +57,10 @@
     "joinedSuccessfully": "Успешно присоединились к комнате",
     "reconnecting": "Переподключение",
     "connectionFailed": "Ошибка подключения",
-    "retry": "Повторить"
+    "retry": "Повторить",
+    "voiceAssistant": "Голосовой помощник",
+    "voiceAssistantActive": "Активен",
+    "voiceCommands": "Голосовые команды: \"Выбери карту 5\" • \"Начни новый раунд\""
   },
   "signIn": {
     "title": "Вход",

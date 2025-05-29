@@ -57,7 +57,10 @@
     "joinedSuccessfully": "Successfully joined the room",
     "reconnecting": "Reconnecting",
     "connectionFailed": "Connection failed",
-    "retry": "Retry"
+    "retry": "Retry",
+    "voiceAssistant": "Voice Assistant",
+    "voiceAssistantActive": "Active",
+    "voiceCommands": "Voice Commands: \"Choose card 5\" • \"Start new round\""
   },
   "signIn": {
     "title": "Sign In",
