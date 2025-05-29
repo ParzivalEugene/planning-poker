@@ -1,8 +1,8 @@
 # Poker Planning ♠️
 
-![hero](meta/hero.png)
+[English version 🇬🇧](README.md) [Русская версия 🇷🇺](README.ru.md)
 
-Russian translation of this file is available: [Русская версия 🇷🇺](README.ru.md)
+![hero](meta/hero.png)
 
 ## Features ✨
 
