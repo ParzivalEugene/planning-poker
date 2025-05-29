@@ -10,9 +10,10 @@ services:
       - "443:443"
       - "5432:5432"
     environment:
-      - TIMEWEBCLOUD_AUTH_TOKEN=${TIMEWEBCLOUD_AUTH_TOKEN}
+      - CF_API_EMAIL=${CF_API_EMAIL}
+      - CF_API_KEY=${CF_API_KEY}
     labels:
-      - "traefik.http.routers.traefik.rule=Host(`poker-traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.rule=Host(`traefik-poker.${DOMAIN}`)"
       - "traefik.http.routers.traefik.entrypoints=websecure"
       - "traefik.http.routers.traefik.tls.certresolver=myresolver"
       - "traefik.http.routers.traefik.service=api@internal"
@@ -20,6 +21,28 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./compose/traefik/traefik.yml:/etc/traefik/traefik.yml
       - ./compose/traefik/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml
+
+  app:
+    image: ghcr.io/parzivaleugene/planning-poker/app:latest
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      database:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      - NEXTAUTH_URL=https://poker.${DOMAIN}
+    labels:
+      - "traefik.http.routers.app.rule=Host(`poker.${DOMAIN}`)"
+      - "traefik.http.routers.app.entrypoints=websecure"
+      - "traefik.http.routers.app.tls=true"
+      - "traefik.http.services.app.loadbalancer.server.port=3000"
+      - "traefik.http.routers.nextjs.tls.certresolver=myresolver"
 
   database:
     image: postgres:latest
@@ -34,7 +57,7 @@ services:
     volumes:
       - database-volume:/var/lib/postgresql/data
     labels:
-      - "traefik.tcp.routers.database.rule=HostSNI(`database.${DOMAIN}`)"
+      - "traefik.tcp.routers.database.rule=HostSNI(`database-poker.${DOMAIN}`)"
       - "traefik.tcp.routers.database.entrypoints=tcp"
       - "traefik.tcp.routers.database.tls.certresolver=myresolver"
       - "traefik.tcp.services.database.loadbalancer.server.port=${DATABASE_PORT}"

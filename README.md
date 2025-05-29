@@ -1,6 +1,6 @@
 # Poker Planning
 
-> work in progress
+![hero](meta/hero.png)
 
 ## Features
 
@@ -49,37 +49,47 @@ In development mode, the app uses `createSmartappDebugger` for testing voice com
 ```mermaid
 classDiagram
 direction BT
-class Game {
-   text title
-   text description
-   timestamp(3) createdAt
-   boolean isRevealed
-   text roomId
-   text id
+class User {
+   String id PK
+   String username
 }
 class Room {
-   text name
-   timestamp(3) createdAt
-   text id
+   String id PK
+   String name
+   String? currentGameId UK
 }
-class User {
-   text username
-   text id
+class Game {
+   String id PK
+   String title
+   String? description
+   Boolean isRevealed
+   String roomId FK
+}
+class RoomHistory {
+   String id PK
+   String roomId FK
+   String gameId FK
+   DateTime startedAt
+   DateTime? endedAt
+   Boolean isActive
 }
 class UserCard {
-   main."cardtype" card
-   text userId
-   text gameId
-   text id
+   String id PK
+   String card
+   String userId FK
+   String gameId FK
 }
 class _RoomUsers {
-   text A
-   text B
+   String A FK
+   String B FK
 }
 
-Game --> Room : roomId#colon;id
-UserCard --> Game : gameId#colon;id
-UserCard --> User : userId#colon;id
-_RoomUsers --> Room : A#colon;id
-_RoomUsers --> User : B#colon;id
+Game --> Room : roomId
+Room --> Game : currentGameId (CurrentGame)
+RoomHistory --> Room : roomId
+RoomHistory --> Game : gameId
+UserCard --> User : userId
+UserCard --> Game : gameId
+_RoomUsers --> Room : A
+_RoomUsers --> User : B
 ```
