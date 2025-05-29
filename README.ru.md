@@ -1,5 +1,7 @@
 # Покер планирование ♠️
 
+[English version 🇬🇧](README.md) [Русская версия 🇷🇺](README.ru.md)
+
 ![hero](meta/hero.png)
 
 ## Возможности ✨
