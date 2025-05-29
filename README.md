@@ -2,7 +2,7 @@
 
 ![hero](meta/hero.png)
 
-Russian translation of this file is available: [Русская версия 🇷🇺](https://github.com/ParzivalEugene/planning-poker/blob/main/README.ru.md)
+Russian translation of this file is available: [Русская версия 🇷🇺](README.ru.md)
 
 ## Features ✨
 
