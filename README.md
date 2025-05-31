@@ -39,12 +39,14 @@ This app includes integration with Salute (SberBank's voice assistant platform) 
    ```bash
    NEXT_PUBLIC_SALUTE_TOKEN="your_salute_token_here"
    NEXT_PUBLIC_SALUTE_SMARTAPP="your_smartapp_name_here"
-The assistant will automatically initialize when you join a room
+   The assistant will automatically initialize when you join a room
+   ```
 
 Development 🔧
 In development mode, the app uses createSmartappDebugger for testing voice commands. In production, it uses the standard createAssistant.
 
 Database Diagram 📊
+
 ```mermaid
 classDiagram
 direction BT

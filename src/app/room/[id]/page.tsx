@@ -127,38 +127,33 @@ export default function Page() {
       },
     );
 
-  // Define callback functions
-  const handleCardSelect = useCallback(
-    (value: string) => {
-      if (!user || isSelectingCard || roomState?.isRevealed) {
-        return;
-      }
+  const handleCardSelect = (value: string) => {
+    if (!user || isSelectingCard || roomState?.isRevealed) {
+      return;
+    }
 
-      setSelectedCard(value);
-      setIsSelectingCard(true);
+    setSelectedCard(value);
+    setIsSelectingCard(true);
 
-      selectCardMutation.mutate({
-        roomId: id,
-        playerId: user.id,
-        cardValue: value,
-      });
-    },
-    [user, isSelectingCard, roomState?.isRevealed, selectCardMutation, id],
-  );
+    selectCardMutation.mutate({
+      roomId: id,
+      playerId: user.id,
+      cardValue: value,
+    });
+  };
 
-  const handleStartNewRound = useCallback(() => {
+  const handleStartNewRound = () => {
     startNewRoundMutation.mutate({
       roomId: id,
     });
-  }, [startNewRoundMutation, id]);
+  };
 
   const handleLogout = useCallback(() => {
     toast.success(t("room.loggedOut"));
     logout();
   }, [logout, t]);
 
-  // Salute Assistant Integration
-  const { isActive: isAssistantActive } = useSaluteAssistant({
+  useSaluteAssistant({
     roomState: {
       players: roomState?.players ?? [],
       isRevealed: roomState?.isRevealed ?? false,
@@ -328,7 +323,9 @@ export default function Page() {
 
   const players = roomState?.players ?? [];
   const currentUser = players.find((p) => p.id === user.id);
-
+  console.log("user", user);
+  console.log("isSelectingCard", isSelectingCard);
+  console.log("roomState?.isRevealed", roomState?.isRevealed);
   return (
     <div className="mobile-landscape-compact min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5QzkyQUMiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>

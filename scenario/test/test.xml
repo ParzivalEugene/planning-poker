@@ -1,13 +1,45 @@
 <test>
-    <!-- Card Selection Tests -->
+    <!-- Card Selection Tests - Numeric -->
     <test-case>
         <q>выбери карту 5</q>
         <a>Карта выбрана!</a>
     </test-case>
     
     <test-case>
+        <q>поставь карту 8</q>
+        <a>Отлично, карта 8!</a>
+    </test-case>
+    
+    <!-- Card Selection Tests - Text -->
+    <test-case>
+        <q>выбери карту пять</q>
+        <a>Отлично, карта 5!</a>
+    </test-case>
+    
+    <test-case>
         <q>поставь карту восемь</q>
-        <a>Отлично, карта восемь!</a>
+        <a>Отлично, карта 8!</a>
+    </test-case>
+    
+    <test-case>
+        <q>возьми карту тринадцать</q>
+        <a>Отлично, карта 13!</a>
+    </test-case>
+    
+    <!-- Card Selection Tests - Closest Match -->
+    <test-case>
+        <q>выбери карту 4</q>
+        <a>Отлично, карта 3!</a>
+    </test-case>
+    
+    <test-case>
+        <q>поставь карту 6</q>
+        <a>Отлично, карта 5!</a>
+    </test-case>
+    
+    <test-case>
+        <q>выбери карту 15</q>
+        <a>Отлично, карта 13!</a>
     </test-case>
     
     <!-- New Round Tests -->

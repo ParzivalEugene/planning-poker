@@ -3,47 +3,68 @@ theme: /
     state: ВыборКарты
         q!: (выбери|поставь|возьми|выбираю) 
             [карту|карта]
-            ($number::cardValue | ноль | один | два | три | пять | восемь | тринадцать | двадцать | сорок | сто)
+            ($AnyText::cardValue)
             
         script:
-            log('selectCard: context: ' + JSON.stringify($context))
-            var request = get_request($context);
-            
-            // Проверяем, можно ли выбирать карты
-            if (!can_select_card(request)) {
-                $reactions.answer("Сейчас нельзя выбирать карты. Дождитесь нового раунда.");
-                return;
+            function parseCardValue(input) {
+                if (!input) return null;
+                
+                var inputStr = input.toString().toLowerCase().trim();
+                var validCards = ["0", "1", "2", "3", "5", "8", "13", "20", "40", "100"];
+                
+                if (validCards.indexOf(inputStr) !== -1) {
+                    return inputStr;
+                }
+                
+                var textToNumber = {
+                    "ноль": "0", "нуль": "0",
+                    "один": "1", "одна": "1",
+                    "два": "2",
+                    "три": "3",
+                    "пять": "5",
+                    "восемь": "8",
+                    "тринадцать": "13",
+                    "двадцать": "20",
+                    "сорок": "40",
+                    "сто": "100"
+                };
+                
+                if (textToNumber[inputStr]) {
+                    return textToNumber[inputStr];
+                }
+                
+                var numValue = parseInt(inputStr);
+                if (!isNaN(numValue)) {
+                    var validNumbers = [0, 1, 2, 3, 5, 8, 13, 20, 40, 100];
+                    var closest = validNumbers[0];
+                    var minDiff = Math.abs(numValue - closest);
+                    
+                    for (var i = 1; i < validNumbers.length; i++) {
+                        var diff = Math.abs(numValue - validNumbers[i]);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            closest = validNumbers[i];
+                        }
+                    }
+                    
+                    return closest.toString();
+                }
+                
+                return null;
             }
             
             var cardValue = $parseTree._cardValue;
-            
-            // Если это число из duckling, извлекаем значение
-            if (cardValue && cardValue.value !== undefined) {
-                cardValue = cardValue.value.toString();
-            }
-            
-            // Преобразуем текстовые числа в цифры
-            if (cardValue === "ноль") cardValue = "0";
-            else if (cardValue === "один") cardValue = "1";
-            else if (cardValue === "два") cardValue = "2";
-            else if (cardValue === "три") cardValue = "3";
-            else if (cardValue === "пять") cardValue = "5";
-            else if (cardValue === "восемь") cardValue = "8";
-            else if (cardValue === "тринадцать") cardValue = "13";
-            else if (cardValue === "двадцать") cardValue = "20";
-            else if (cardValue === "сорок") cardValue = "40";
-            else if (cardValue === "сто") cardValue = "100";
-            
-            // Проверяем, что карта допустима
-            var validCards = ["0", "1", "2", "3", "5", "8", "13", "20", "40", "100"];
-            if (validCards.indexOf(cardValue) === -1) {
+            var parsedValue = parseCardValue(cardValue);
+            if (parsedValue === null) {
                 $reactions.answer("Недопустимое значение карты. Доступные карты: 0, 1, 2, 3, 5, 8, 13, 20, 40, 100");
                 return;
             }
             
-            selectCard(cardValue, $context);
+            selectCard(parsedValue, $context);
             
-        random:
-            a: Карта выбрана!
-            a: Отлично, карта {{ cardValue }}!
-            a: Принято! 
+            var responses = [
+                "Карта выбрана!",
+                "Отлично, карта " + parsedValue + "!",
+                "Принято!"
+            ];
+            $reactions.answer(responses[Math.floor(Math.random() * responses.length)]);
