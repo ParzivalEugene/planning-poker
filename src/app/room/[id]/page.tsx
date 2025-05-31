@@ -4,6 +4,7 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n, useUser } from "@/contexts";
+import { useSaluteAssistant } from "@/hooks/useSaluteAssistant";
 import { isValidRoomId } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Copy, LogOut } from "lucide-react";
@@ -125,6 +126,49 @@ export default function Page() {
         },
       },
     );
+
+  // Define callback functions
+  const handleCardSelect = useCallback(
+    (value: string) => {
+      if (!user || isSelectingCard || roomState?.isRevealed) {
+        return;
+      }
+
+      setSelectedCard(value);
+      setIsSelectingCard(true);
+
+      selectCardMutation.mutate({
+        roomId: id,
+        playerId: user.id,
+        cardValue: value,
+      });
+    },
+    [user, isSelectingCard, roomState?.isRevealed, selectCardMutation, id],
+  );
+
+  const handleStartNewRound = useCallback(() => {
+    startNewRoundMutation.mutate({
+      roomId: id,
+    });
+  }, [startNewRoundMutation, id]);
+
+  const handleLogout = useCallback(() => {
+    toast.success(t("room.loggedOut"));
+    logout();
+  }, [logout, t]);
+
+  // Salute Assistant Integration
+  const { isActive: isAssistantActive } = useSaluteAssistant({
+    roomState: {
+      players: roomState?.players ?? [],
+      isRevealed: roomState?.isRevealed ?? false,
+      allPlayersVoted: roomState?.allPlayersVoted ?? false,
+      gameId: roomState?.gameId ?? null,
+    },
+    currentPlayerId: user?.id ?? "",
+    onSelectCard: handleCardSelect,
+    onStartNewRound: handleStartNewRound,
+  });
 
   api.poker.onRoomUpdate.useSubscription(
     {
@@ -257,46 +301,6 @@ export default function Page() {
         toast.error(t("errors.copyFailed"));
       });
   }, [id, t]);
-
-  const handleCardSelect = useCallback(
-    (value: string) => {
-      if (!user || isSelectingCard || roomState?.isRevealed) {
-        return;
-      }
-
-      setSelectedCard(value);
-      setIsSelectingCard(true);
-
-      selectCardMutation.mutate({
-        roomId: id,
-        playerId: user.id,
-        cardValue: value,
-      });
-    },
-    [user, isSelectingCard, roomState?.isRevealed, selectCardMutation, id],
-  );
-
-  const handleStartNewRound = useCallback(() => {
-    startNewRoundMutation.mutate({
-      roomId: id,
-    });
-  }, [startNewRoundMutation, id]);
-
-  const handleLogout = useCallback(() => {
-    toast.success(t("room.loggedOut"));
-    logout();
-  }, [logout, t]);
-
-  // useSaluteAssistant({
-  //   roomId: id,
-  //   players: roomState?.players ?? [],
-  //   isRevealed: roomState?.isRevealed ?? false,
-  //   allPlayersVoted:
-  //     (roomState?.players ?? []).every((p) => p.selectedCard !== null) &&
-  //     (roomState?.players ?? []).length > 0,
-  //   onSelectCard: handleCardSelect,
-  //   onStartNewRound: handleStartNewRound,
-  // });
 
   if (!id || !isValidRoomId(id)) {
     return null;
@@ -467,7 +471,6 @@ export default function Page() {
                   ? t("room.cardsRevealedFooter")
                   : t("room.availableCards")}
               </p>
-
               <div className="gap-responsive-sm mx-auto flex max-w-full flex-wrap justify-center sm:max-w-4xl">
                 {cardValues.map((value) => {
                   const isDisabled =

@@ -1,0 +1,26 @@
+{
+  "project": {
+    "id": "planning-poker",
+    "name": "planning-poker",
+    "folder": "/"
+  },
+  "settings": {
+    "language": "ru",
+    "spellingCorrection": false,
+    "classificationAlgorithm": "sts",
+    "timezone": "Europe/Moscow",
+    "extendedSettings": {
+      "tokenizerEngine": "default"
+    }
+  },
+  "intents": [],
+  "entities": [],
+  "enabledSystemEntities": [
+    "duckling.number",
+    "duckling.time",
+    "duckling.duration",
+    "duckling.phone-number",
+    "duckling.email",
+    "duckling.url"
+  ]
+}

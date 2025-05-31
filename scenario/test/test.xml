@@ -1,0 +1,23 @@
+<test>
+    <!-- Card Selection Tests -->
+    <test-case>
+        <q>выбери карту 5</q>
+        <a>Карта выбрана!</a>
+    </test-case>
+    
+    <test-case>
+        <q>поставь карту восемь</q>
+        <a>Отлично, карта восемь!</a>
+    </test-case>
+    
+    <!-- New Round Tests -->
+    <test-case>
+        <q>начни новый раунд</q>
+        <a>Новый раунд начат!</a>
+    </test-case>
+    
+    <test-case>
+        <q>следующий раунд</q>
+        <a>Отлично, начинаем новый раунд!</a>
+    </test-case>
+</test>    
