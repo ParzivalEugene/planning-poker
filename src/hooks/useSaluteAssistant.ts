@@ -88,8 +88,6 @@ export function useSaluteAssistant({
   }, [roomState]);
 
   const getStateForAssistant = () => {
-    console.log("getStateForAssistant: roomState:", roomStateRef.current);
-
     const state = {
       item_selector: {
         items: [
@@ -118,13 +116,10 @@ export function useSaluteAssistant({
       },
     };
 
-    console.log("getStateForAssistant: state:", state);
     return state;
   };
 
   const dispatchAssistantAction = (action: AssistantAction) => {
-    console.log("dispatchAssistantAction", action);
-
     if (action) {
       switch (action.type) {
         case "select_card":
@@ -150,36 +145,13 @@ export function useSaluteAssistant({
     }
 
     try {
-      console.log("Initializing Salute Assistant...");
       assistantRef.current = initializeAssistant(() => getStateForAssistant());
 
       assistantRef.current.on("data", (event: AssistantEvent) => {
-        console.log("assistant.on(data)", event);
-
-        if (event.type === "character") {
-          console.log(
-            `assistant.on(data): character: "${event?.character?.id}"`,
-          );
-        } else if (event.type === "insets") {
-          console.log("assistant.on(data): insets");
-        } else if (event.action) {
+        if (event.action) {
           dispatchAssistantAction(event.action);
         }
       });
-
-      assistantRef.current.on("start", (event: AssistantEvent) => {
-        console.log("assistant.on(start)", event);
-      });
-
-      assistantRef.current.on("command", (event: AssistantEvent) => {
-        console.log("assistant.on(command)", event);
-      });
-
-      assistantRef.current.on("error", (event: AssistantEvent) => {
-        console.log("assistant.on(error)", event);
-      });
-
-      console.log("Salute Assistant initialized successfully");
     } catch (error) {
       console.error("Failed to initialize Salute Assistant:", error);
     }

@@ -60,7 +60,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       !userQuery.isError &&
       !loginMutation.isPending
     ) {
-      console.log("User not found on server, re-registering:", user.username);
       loginMutation.mutate({ username: user.username });
     }
   }, [

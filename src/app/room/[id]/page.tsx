@@ -173,7 +173,6 @@ export default function Page() {
     {
       enabled: !!id && !!user && isValidRoomId(id),
       onData: (data) => {
-        console.log("Room update:", data);
         lastEventId.current = data.id;
 
         switch (data.data.type) {
@@ -206,7 +205,6 @@ export default function Page() {
         }
 
         reconnectTimeoutRef.current = setTimeout(() => {
-          console.log("Attempting to reconnect subscription...");
           void utils.poker.getRoomState.invalidate({ roomId: id });
         }, 2000);
       },
@@ -240,7 +238,6 @@ export default function Page() {
     ) {
       const userInRoom = roomState.players.some((p) => p.id === user.id);
       if (!userInRoom) {
-        console.log("User not found in room, retrying join...");
         hasJoinedRoom.current = false;
         setConnectionRetries((prev) => prev + 1);
 
@@ -323,9 +320,6 @@ export default function Page() {
 
   const players = roomState?.players ?? [];
   const currentUser = players.find((p) => p.id === user.id);
-  console.log("user", user);
-  console.log("isSelectingCard", isSelectingCard);
-  console.log("roomState?.isRevealed", roomState?.isRevealed);
   return (
     <div className="mobile-landscape-compact min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5QzkyQUMiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>
