@@ -1,4 +1,4 @@
-name: "poker-planning"
+name: "poker-planning-local"
 
 services:
   traefik:
@@ -23,7 +23,6 @@ services:
       - ./compose/traefik/dynamic_conf.yml:/etc/traefik/dynamic_conf.yml
 
   app:
-    # image: ghcr.io/parzivaleugene/planning-poker/app:latest
     build:
       context: .
       dockerfile: Dockerfile

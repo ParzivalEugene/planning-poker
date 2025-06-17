@@ -199,11 +199,56 @@
   }
 
   .gap-responsive-md {
-    @apply gap-2 sm:gap-4 md:gap-6;
+    @apply gap-2 sm:gap-3 md:gap-4;
   }
 
   .gap-responsive-lg {
-    @apply gap-3 sm:gap-6 md:gap-8 lg:gap-10;
+    @apply gap-3 sm:gap-4 md:gap-6;
+  }
+
+  /* Salute Assistant Safe Area Support */
+  .salute-assistant-safe {
+    /* Bottom padding for Salute assistant UI (72-110px) */
+    padding-bottom: env(salute-assistant-bottom, 110px);
+  }
+
+  .salute-assistant-bottom-space {
+    /* Reserve space for Salute assistant at bottom */
+    margin-bottom: env(salute-assistant-bottom, 110px);
+  }
+
+  .salute-content-height {
+    /* Calculate height minus assistant space */
+    min-height: calc(100vh - env(salute-assistant-bottom, 110px));
+  }
+
+  /* Responsive adjustments for different screen sizes */
+  @media (max-width: 768px) {
+    .salute-assistant-safe {
+      padding-bottom: env(salute-assistant-bottom, 90px);
+    }
+
+    .salute-assistant-bottom-space {
+      margin-bottom: env(salute-assistant-bottom, 90px);
+    }
+
+    .salute-content-height {
+      min-height: calc(100vh - env(salute-assistant-bottom, 90px));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .salute-assistant-safe {
+      padding-bottom: env(salute-assistant-bottom, 72px);
+    }
+
+    .salute-assistant-bottom-space {
+      margin-bottom: env(salute-assistant-bottom, 72px);
+    }
+
+    .salute-content-height {
+      min-height: calc(100vh - env(salute-assistant-bottom, 72px));
+    }
   }
 }
 

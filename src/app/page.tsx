@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n, useUser } from "@/contexts";
+import { useDumbSaluteAssistant } from "@/hooks/useSaluteAssistant";
 import { generateRoomId, isValidRoomId } from "@/lib/utils";
 import {
   ArrowRight,
@@ -55,6 +56,8 @@ export default function HomePage() {
     router.push(`/room/${cleanRoomId}`);
   };
 
+  useDumbSaluteAssistant();
+
   const features = [
     {
       icon: Zap,
@@ -87,7 +90,7 @@ export default function HomePage() {
       </div>
 
       <div className="relative flex min-h-screen flex-col items-center justify-center p-6">
-        <div className="w-full max-w-4xl space-y-12">
+        <div className="w-full max-w-4xl space-y-12 pb-40 md:pb-0">
           <div className="space-y-8 text-center">
             <div className="flex justify-center">
               <div className="relative">
@@ -101,14 +104,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h1 className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-5xl leading-tight font-bold text-transparent md:text-6xl dark:from-white dark:via-blue-100 dark:to-indigo-100">
-                {t("home.title")}
-              </h1>
-              <p className="mx-auto max-w-2xl text-xl leading-relaxed text-slate-600 dark:text-slate-300">
-                {t("home.subtitle")}
-              </p>
-            </div>
+            <h1 className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-5xl leading-tight font-bold text-transparent md:text-6xl dark:from-white dark:via-blue-100 dark:to-indigo-100">
+              {t("home.title")}
+            </h1>
 
             {user && (
               <div className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-green-700 dark:border-green-800 dark:bg-green-950/30 dark:text-green-300">
@@ -193,51 +191,6 @@ export default function HomePage() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
-
-          <div className="space-y-8">
-            <div className="text-center">
-              <h2 className="mb-2 text-2xl font-semibold text-slate-800 dark:text-slate-200">
-                {t("home.features.title")}
-              </h2>
-              <p className="text-slate-600 dark:text-slate-400">
-                {t("home.features.subtitle")}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {features.map((feature, index) => (
-                <div
-                  key={index}
-                  className="group rounded-xl border border-slate-200/50 bg-white/50 p-6 text-center backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-white/80 hover:shadow-lg dark:border-slate-700/50 dark:bg-slate-900/50 dark:hover:bg-slate-900/80"
-                >
-                  <div className="mx-auto mb-3 w-fit rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 p-3 transition-transform duration-300 group-hover:scale-110 dark:from-slate-800 dark:to-slate-700">
-                    <feature.icon className="h-6 w-6 text-slate-600 dark:text-slate-300" />
-                  </div>
-                  <h3 className="mb-1 text-sm font-medium text-slate-800 dark:text-slate-200">
-                    {feature.title}
-                  </h3>
-                  <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                    {feature.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="text-center">
-            <div className="inline-block rounded-2xl border border-slate-200/50 bg-white/60 p-6 shadow-lg backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-900/60">
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                {t("home.features.enterprise").split("{contactLink}")[0]}
-                <a
-                  href="mailto:contact@michkoff.com"
-                  className="font-medium text-blue-600 underline decoration-2 underline-offset-2 transition-colors duration-200 hover:text-blue-700 hover:decoration-blue-600 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:decoration-blue-400"
-                >
-                  {t("home.features.contactUs")}
-                </a>
-                {t("home.features.enterprise").split("{contactLink}")[1]}
-              </p>
-            </div>
           </div>
         </div>
       </div>

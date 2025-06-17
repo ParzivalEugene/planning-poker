@@ -53,7 +53,7 @@ export default function Page() {
       void utils.poker.getRoomState.invalidate({ roomId: id });
     },
     onError: (error) => {
-      const errorMessage = error.message ?? t("errors.unknownError");
+      const errorMessage = t("errors.unknownError");
       toast.error(errorMessage);
 
       if (errorMessage.includes("Room is full")) {
@@ -89,7 +89,7 @@ export default function Page() {
     },
     onError: (error) => {
       setSelectedCard(null);
-      toast.error(error.message ?? t("errors.cardSelectionFailed"));
+      toast.error(t("errors.cardSelectionFailed"));
     },
     onSettled: () => {
       setIsSelectingCard(false);
@@ -103,7 +103,7 @@ export default function Page() {
       void utils.poker.getRoomState.invalidate({ roomId: id });
     },
     onError: (error) => {
-      toast.error(error.message ?? t("errors.newRoundFailed"));
+      toast.error(t("errors.newRoundFailed"));
     },
   });
 
@@ -321,10 +321,10 @@ export default function Page() {
   const players = roomState?.players ?? [];
   const currentUser = players.find((p) => p.id === user.id);
   return (
-    <div className="mobile-landscape-compact min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
+    <div className="mobile-landscape-compact h-[calc(100vh-140px)] overflow-hidden bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 md:h-[calc(100vh-110px)] dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5QzkyQUMiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>
 
-      <div className="relative flex min-h-screen flex-col">
+      <div className="relative flex h-full flex-col">
         {/* Header - Responsive */}
         <header className="border-b border-white/20 bg-white/60 backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-900/60">
           <div className="container-responsive flex h-12 items-center justify-between sm:h-14 md:h-16">
@@ -423,7 +423,7 @@ export default function Page() {
           </div>
         </header>
 
-        <div className="padding-responsive-sm planning-table flex flex-1 items-center justify-center">
+        <div className="padding-responsive-sm planning-table flex min-h-0 flex-1 items-center justify-center">
           <div className="mx-auto flex h-full w-full items-center justify-center">
             <PlanningTable
               players={players}
@@ -435,10 +435,10 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Footer - Responsive card selection */}
-        <footer className="card-selection border-t border-white/20 bg-white/60 backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-900/60">
-          <div className="container-responsive padding-responsive-sm">
-            <div className="spacing-responsive-sm flex flex-col">
+        {/* Footer - Responsive card selection with salute assistant padding */}
+        <footer className="card-selection flex-shrink-0 border-t border-white/20 bg-white/60 backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-900/60">
+          <div className="container-responsive flex flex-col justify-center px-2 py-2 sm:px-4">
+            <div className="flex flex-col gap-1 sm:gap-2">
               {/* Mobile info bar - Room ID and Language selector */}
               <div className="flex items-center justify-between md:hidden">
                 <div className="text-center">
@@ -457,12 +457,12 @@ export default function Page() {
                 <LanguageSelector />
               </div>
 
-              <p className="text-responsive-xs text-center text-slate-600 dark:text-slate-400">
+              <p className="hidden text-center text-xs text-slate-600 sm:block dark:text-slate-400">
                 {roomState?.isRevealed
                   ? t("room.cardsRevealedFooter")
                   : t("room.availableCards")}
               </p>
-              <div className="gap-responsive-sm mx-auto flex max-w-full flex-wrap justify-center sm:max-w-4xl">
+              <div className="mx-auto flex max-w-full flex-wrap justify-center gap-1 sm:max-w-4xl sm:gap-2">
                 {cardValues.map((value) => {
                   const isDisabled =
                     selectCardMutation.isPending ||
@@ -481,7 +481,7 @@ export default function Page() {
                       disabled={isDisabled}
                     >
                       <Card
-                        className={`group relative flex items-center justify-center overflow-hidden border-0 bg-white/70 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-slate-900/70 ${"h-12 w-8 sm:h-14 sm:w-10 md:h-16 md:w-12 lg:h-18 lg:w-14"} ${
+                        className={`group relative flex h-10 w-6 items-center justify-center overflow-hidden border-0 bg-white/70 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:h-12 sm:w-8 md:h-13 md:w-9 dark:bg-slate-900/70 ${
                           isSelected
                             ? "ring-2 ring-blue-500 ring-offset-2 ring-offset-transparent"
                             : ""
@@ -495,7 +495,7 @@ export default function Page() {
                           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
                         )}
                         <CardContent className="relative flex h-full items-center justify-center p-0">
-                          <span className="text-responsive-sm high-dpi-text font-bold text-slate-800 dark:text-slate-200">
+                          <span className="high-dpi-text text-xs font-bold text-slate-800 sm:text-sm dark:text-slate-200">
                             {value}
                           </span>
                         </CardContent>
@@ -506,9 +506,9 @@ export default function Page() {
               </div>
 
               {players.length >= 8 && (
-                <div className="mt-2 text-center">
-                  <div className="inline-block rounded-lg border border-slate-200/50 bg-white/60 p-2 shadow-lg backdrop-blur-sm sm:rounded-xl sm:p-3 dark:border-slate-700/50 dark:bg-slate-900/60">
-                    <p className="text-xs text-slate-600 sm:text-sm dark:text-slate-300">
+                <div className="mt-1 text-center">
+                  <div className="inline-block rounded border border-slate-200/50 bg-white/60 p-1 shadow backdrop-blur-sm sm:rounded-lg sm:p-2 dark:border-slate-700/50 dark:bg-slate-900/60">
+                    <p className="text-xs text-slate-600 dark:text-slate-300">
                       {t("room.capacityWarning", { current: players.length })}
                       {players.length >= 10 && (
                         <span className="mt-1 block text-yellow-600 dark:text-yellow-400">
@@ -528,9 +528,9 @@ export default function Page() {
               )}
 
               {connectionRetries > 0 && connectionRetries < MAX_RETRIES && (
-                <div className="mt-2 text-center">
-                  <div className="inline-block rounded-lg border border-yellow-200/50 bg-yellow-50/60 p-2 shadow-lg backdrop-blur-sm sm:rounded-xl sm:p-3 dark:border-yellow-800/50 dark:bg-yellow-950/60">
-                    <p className="text-xs text-yellow-700 sm:text-sm dark:text-yellow-300">
+                <div className="mt-1 text-center">
+                  <div className="inline-block rounded border border-yellow-200/50 bg-yellow-50/60 p-1 shadow backdrop-blur-sm sm:rounded-lg sm:p-2 dark:border-yellow-800/50 dark:bg-yellow-950/60">
+                    <p className="text-xs text-yellow-700 dark:text-yellow-300">
                       {t("room.reconnecting")} ({connectionRetries}/
                       {MAX_RETRIES})
                     </p>
@@ -539,14 +539,14 @@ export default function Page() {
               )}
 
               {connectionRetries >= MAX_RETRIES && (
-                <div className="mt-2 text-center">
-                  <div className="inline-block rounded-lg border border-red-200/50 bg-red-50/60 p-2 shadow-lg backdrop-blur-sm sm:rounded-xl sm:p-3 dark:border-red-800/50 dark:bg-red-950/60">
-                    <p className="text-xs text-red-700 sm:text-sm dark:text-red-300">
+                <div className="mt-1 text-center">
+                  <div className="inline-block rounded border border-red-200/50 bg-red-50/60 p-1 shadow backdrop-blur-sm sm:rounded-lg sm:p-2 dark:border-red-800/50 dark:bg-red-950/60">
+                    <p className="text-xs text-red-700 dark:text-red-300">
                       {t("room.connectionFailed")}
                       <Button
                         variant="link"
                         size="sm"
-                        className="ml-2 h-auto p-0 text-xs text-red-700 hover:text-red-800 sm:text-sm dark:text-red-300 dark:hover:text-red-200"
+                        className="ml-2 h-auto p-0 text-xs text-red-700 hover:text-red-800 dark:text-red-300 dark:hover:text-red-200"
                         onClick={() => {
                           setConnectionRetries(0);
                           hasJoinedRoom.current = false;

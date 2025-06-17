@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n, useUser } from "@/contexts";
+import { useDumbSaluteAssistant } from "@/hooks/useSaluteAssistant";
 import { isValidRoomId } from "@/lib/utils";
 import { Sparkles, Users } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -22,6 +23,8 @@ export default function SignInPage() {
 
   const roomId = searchParams.get("room");
   const callbackUrl = searchParams.get("callback") ?? "/";
+
+  useDumbSaluteAssistant();
 
   useEffect(() => {
     if (!isLoading && user) {

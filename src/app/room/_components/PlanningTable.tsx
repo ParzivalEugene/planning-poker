@@ -84,9 +84,9 @@ export function PlanningTable({
   );
 
   return (
-    <div className="container-responsive">
+    <div className="container-responsive flex h-full max-h-full flex-col justify-center">
       {/* Top row of players - responsive spacing */}
-      <div className="gap-responsive-md flex justify-center">
+      <div className="gap-responsive-md flex flex-shrink-0 justify-center">
         {topPlayers.map((item, index) => (
           <PlayerCard
             key={`top-${index}`}
@@ -98,7 +98,7 @@ export function PlanningTable({
       </div>
 
       {/* Middle section with table and side players - responsive layout */}
-      <div className="flex items-center justify-center">
+      <div className="flex min-h-0 flex-1 items-center justify-center">
         {/* Left column players - responsive spacing */}
         <div className="spacing-responsive-md mr-1 flex flex-col sm:mr-2 md:mr-4 lg:mr-6 xl:mr-8">
           {leftPlayers.map((item, index) => (
@@ -112,10 +112,10 @@ export function PlanningTable({
         </div>
 
         {/* Center table - responsive sizing and content */}
-        <div className="w-full max-w-[280px] flex-1 px-1 sm:max-w-[320px] sm:px-2 md:max-w-[380px] md:px-3 lg:max-w-[450px] lg:px-4 xl:max-w-[500px] xl:px-5">
-          <div className="group padding-responsive-md relative mx-auto flex w-full flex-col items-center justify-center overflow-hidden rounded-xl border-0 bg-white/70 shadow-xl backdrop-blur-sm transition-all duration-300 sm:rounded-2xl dark:bg-slate-900/70">
-            {/* Responsive aspect ratio */}
-            <div className="aspect-[4/3] w-full sm:aspect-[3/2] md:aspect-[5/3] lg:aspect-[16/9]">
+        <div className="min-h-0 w-full max-w-[280px] flex-1 px-1 sm:max-w-[320px] sm:px-2 md:max-w-[380px] md:px-3 lg:max-w-[450px] lg:px-4 xl:max-w-[500px] xl:px-5">
+          <div className="group padding-responsive-md relative mx-auto flex h-full max-h-full min-h-[200px] w-full flex-col items-center justify-center overflow-hidden rounded-xl border-0 bg-white/70 shadow-xl backdrop-blur-sm transition-all duration-300 sm:rounded-2xl dark:bg-slate-900/70">
+            {/* Flexible content area */}
+            <div className="flex h-full min-h-[150px] w-full items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 opacity-0 transition-opacity duration-300"></div>
               <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
                 <h2 className="text-responsive-lg high-dpi-text mb-2 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text font-bold text-transparent sm:mb-3 dark:from-white dark:via-blue-100 dark:to-indigo-100">
@@ -186,7 +186,7 @@ export function PlanningTable({
       </div>
 
       {/* Bottom row of players - responsive spacing */}
-      <div className="gap-responsive-md flex justify-center">
+      <div className="gap-responsive-md flex flex-shrink-0 justify-center">
         {bottomPlayers.map((item, index) => (
           <PlayerCard
             key={`bottom-${index}`}

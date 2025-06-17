@@ -3,5 +3,5 @@ export default function RoomLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return <div className="h-screen bg-[#1A2539]">{children}</div>;
 }

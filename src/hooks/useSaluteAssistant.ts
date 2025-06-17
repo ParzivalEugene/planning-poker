@@ -1,7 +1,11 @@
 "use client";
 
 import { env } from "@/env";
-import { createAssistant, createSmartappDebugger } from "@salutejs/client";
+import {
+  createAssistant,
+  createSmartappDebugger,
+  type AssistantAppState,
+} from "@salutejs/client";
 import { useEffect, useRef } from "react";
 
 type Player = {
@@ -46,7 +50,7 @@ type AssistantInstance = {
 const CARD_VALUES = ["0", "1", "2", "3", "5", "8", "13", "20", "40", "100"];
 
 const initializeAssistant = (
-  getState: () => Record<string, unknown>,
+  getState: () => AssistantAppState,
 ): AssistantInstance => {
   if (process.env.NODE_ENV === "development") {
     return createSmartappDebugger({
@@ -54,7 +58,29 @@ const initializeAssistant = (
       initPhrase: `Запусти ${env.NEXT_PUBLIC_SALUTE_SMARTAPP}`,
       getState,
       nativePanel: {
-        defaultText: "выбери карту 5",
+        defaultText: "",
+        screenshotMode: false,
+        tabIndex: -1,
+      },
+    }) as AssistantInstance;
+  } else {
+    return createAssistant({ getState }) as AssistantInstance;
+  }
+};
+
+export const useDumbSaluteAssistant = () => {
+  const getState = () => ({
+    inRoom: false,
+    canSelectCard: false,
+    canStartNewRound: false,
+  });
+  if (process.env.NODE_ENV === "development") {
+    return createSmartappDebugger({
+      token: env.NEXT_PUBLIC_SALUTE_TOKEN,
+      initPhrase: `Запусти ${env.NEXT_PUBLIC_SALUTE_SMARTAPP}`,
+      getState,
+      nativePanel: {
+        defaultText: "",
         screenshotMode: false,
         tabIndex: -1,
       },
@@ -87,8 +113,8 @@ export function useSaluteAssistant({
     roomStateRef.current = roomState;
   }, [roomState]);
 
-  const getStateForAssistant = () => {
-    const state = {
+  const getStateForAssistant = (): AssistantAppState => {
+    const state: AssistantAppState = {
       item_selector: {
         items: [
           ...CARD_VALUES.map((card, index) => ({
@@ -114,6 +140,9 @@ export function useSaluteAssistant({
           "следующий",
         ],
       },
+      inRoom: true,
+      canSelectCard: !roomState.isRevealed,
+      canStartNewRound: roomState.isRevealed,
     };
 
     return state;
