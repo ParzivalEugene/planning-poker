@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useI18n } from "@/contexts/I18nContext";
+
 import { type Player, type PlayerPosition } from "./types";
 
 type PlayerCardProps = {
@@ -17,7 +17,6 @@ export function PlayerCard({
   position,
   isRevealed = false,
 }: PlayerCardProps) {
-  const { t } = useI18n();
   const isEmpty = !player;
 
   // Define special styling based on position for better alignment - responsive
@@ -67,7 +66,7 @@ export function PlayerCard({
             : "text-slate-700 dark:text-slate-300"
         } high-dpi-text max-w-[60px] truncate text-center sm:max-w-[70px] md:max-w-[80px] lg:max-w-[90px]`}
       >
-        {isEmpty ? t("room.emptySeat") : player.name}
+        {isEmpty ? "Свободно" : player.name}
       </span>
     </div>
   );

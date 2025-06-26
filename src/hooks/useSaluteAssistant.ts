@@ -52,6 +52,11 @@ const CARD_VALUES = ["0", "1", "2", "3", "5", "8", "13", "20", "40", "100"];
 const initializeAssistant = (
   getState: () => AssistantAppState,
 ): AssistantInstance => {
+  // Ensure we're on the client side
+  if (typeof window === "undefined") {
+    throw new Error("Assistant can only be initialized on the client side");
+  }
+
   if (process.env.NODE_ENV === "development") {
     return createSmartappDebugger({
       token: env.NEXT_PUBLIC_SALUTE_TOKEN,
@@ -69,25 +74,61 @@ const initializeAssistant = (
 };
 
 export const useDumbSaluteAssistant = () => {
-  const getState = () => ({
-    inRoom: false,
-    canSelectCard: false,
-    canStartNewRound: false,
-  });
-  if (process.env.NODE_ENV === "development") {
-    return createSmartappDebugger({
-      token: env.NEXT_PUBLIC_SALUTE_TOKEN,
-      initPhrase: `Запусти ${env.NEXT_PUBLIC_SALUTE_SMARTAPP}`,
-      getState,
-      nativePanel: {
-        defaultText: "",
-        screenshotMode: false,
-        tabIndex: -1,
-      },
-    }) as AssistantInstance;
-  } else {
-    return createAssistant({ getState }) as AssistantInstance;
-  }
+  const assistantRef = useRef<AssistantInstance | null>(null);
+
+  useEffect(() => {
+    // Only initialize on client side
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (!env.NEXT_PUBLIC_SALUTE_TOKEN || !env.NEXT_PUBLIC_SALUTE_SMARTAPP) {
+      console.warn("Salute credentials not found in environment variables");
+      return;
+    }
+
+    const getState = () => ({
+      inRoom: false,
+      canSelectCard: false,
+      canStartNewRound: false,
+    });
+
+    try {
+      if (process.env.NODE_ENV === "development") {
+        assistantRef.current = createSmartappDebugger({
+          token: env.NEXT_PUBLIC_SALUTE_TOKEN,
+          initPhrase: `Запусти ${env.NEXT_PUBLIC_SALUTE_SMARTAPP}`,
+          getState,
+          nativePanel: {
+            defaultText: "",
+            screenshotMode: false,
+            tabIndex: -1,
+          },
+        }) as AssistantInstance;
+      } else {
+        assistantRef.current = createAssistant({
+          getState,
+        }) as AssistantInstance;
+      }
+    } catch (error) {
+      console.error("Failed to initialize Salute Assistant:", error);
+    }
+
+    return () => {
+      if (assistantRef.current) {
+        try {
+          assistantRef.current.destroy?.();
+        } catch (error) {
+          console.error("Error destroying assistant:", error);
+        }
+      }
+    };
+  }, []);
+
+  return {
+    isActive: !!assistantRef.current,
+    assistant: assistantRef.current,
+  };
 };
 
 export function useSaluteAssistant({
@@ -168,6 +209,11 @@ export function useSaluteAssistant({
   };
 
   useEffect(() => {
+    // Only initialize on client side
+    if (typeof window === "undefined") {
+      return;
+    }
+
     if (!env.NEXT_PUBLIC_SALUTE_TOKEN || !env.NEXT_PUBLIC_SALUTE_SMARTAPP) {
       console.warn("Salute credentials not found in environment variables");
       return;

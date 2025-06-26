@@ -6,16 +6,19 @@ theme: /
             ($AnyText::cardValue)
             
         script:
+            // Enhanced parsing function
             function parseCardValue(input) {
                 if (!input) return null;
                 
                 var inputStr = input.toString().toLowerCase().trim();
                 var validCards = ["0", "1", "2", "3", "5", "8", "13", "20", "40", "100"];
                 
+                // Direct match - if input is already a valid card
                 if (validCards.indexOf(inputStr) !== -1) {
                     return inputStr;
                 }
                 
+                // Text to number conversion (Russian)
                 var textToNumber = {
                     "ноль": "0", "нуль": "0",
                     "один": "1", "одна": "1",
@@ -33,6 +36,7 @@ theme: /
                     return textToNumber[inputStr];
                 }
                 
+                // Try to parse as number and find closest match
                 var numValue = parseInt(inputStr);
                 if (!isNaN(numValue)) {
                     var validNumbers = [0, 1, 2, 3, 5, 8, 13, 20, 40, 100];
@@ -53,6 +57,13 @@ theme: /
                 return null;
             }
             
+            var inRoom = $request.rawRequest.payload.meta.current_app.state.inRoom
+
+            if (!inRoom) {
+                $reactions.answer("Чтобы выбрать карту, зайдите в комнату.");
+                return;
+            }
+
             var cardValue = $parseTree._cardValue;
             var parsedValue = parseCardValue(cardValue);
             if (parsedValue === null) {

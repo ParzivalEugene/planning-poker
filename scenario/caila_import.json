@@ -1,26 +1,22 @@
 {
-  "project": {
-    "id": "poker-planning",
-    "name": "poker-planning",
-    "folder": "/"
+  "project" : {
+    "id" : "poker_planirovaniya-7321653-zvb",
+    "name" : "poker_planirovaniya-7321653-zvb",
+    "folder" : "/jaicp"
   },
-  "settings": {
-    "language": "ru",
-    "spellingCorrection": false,
-    "classificationAlgorithm": "sts",
-    "timezone": "Europe/Moscow",
-    "extendedSettings": {
-      "tokenizerEngine": "default"
-    }
+  "settings" : {
+    "language" : "ru",
+    "spellingCorrection" : false,
+    "classificationAlgorithm" : "sts",
+    "timezone" : "Europe/Moscow",
+    "extendedSettings" : {
+      "tokenizerEngine" : "default"
+    },
+    "shared" : false,
+    "businessShared" : false,
+    "business" : false
   },
-  "intents": [],
-  "entities": [],
-  "enabledSystemEntities": [
-    "duckling.number",
-    "duckling.time",
-    "duckling.duration",
-    "duckling.phone-number",
-    "duckling.email",
-    "duckling.url"
-  ]
+  "intents" : [ ],
+  "entities" : [ ],
+  "enabledSystemEntities" : [ "duckling.number", "duckling.time", "duckling.duration", "duckling.phone-number", "duckling.email", "duckling.url" ]
 }

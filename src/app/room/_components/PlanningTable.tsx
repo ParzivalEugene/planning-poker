@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useI18n } from "@/contexts/I18nContext";
+
 import { PlayerCard } from "./PlayerCard";
 import { type Player, type PlayerPosition } from "./types";
 
@@ -15,12 +15,11 @@ export type PlanningTableProps = {
 
 export function PlanningTable({
   players,
-  title = "Planning Area",
+  title = "Planning Poker",
   isRevealed = false,
   onStartNewRound,
   isStartingNewRound = false,
 }: PlanningTableProps) {
-  const { t } = useI18n();
   // Define the table grid layout - 5 columns and 4 rows
   const gridLayout = [
     // Top row - positions 2-1, 3-1, 4-1
@@ -128,16 +127,14 @@ export function PlanningTable({
                         className={`text-responsive-xs mb-2 font-medium ${players.length >= 10 ? "text-red-600 dark:text-red-400" : "text-yellow-600 dark:text-yellow-400"}`}
                       >
                         {players.length >= 10
-                          ? t("room.roomFullStatus")
-                          : t("room.almostFullStatus", {
-                              current: players.length,
-                            })}
+                          ? "Комната заполнена (10/10)"
+                          : `Почти заполнена (${players.length}/10)`}
                       </div>
                     )}
                     {isRevealed ? (
                       <div className="spacing-responsive-sm">
                         <div className="text-responsive-sm font-medium text-green-600 dark:text-green-400">
-                          {t("room.cardsRevealedStatus")}
+                          Карты раскрыты!
                         </div>
                         {onStartNewRound && (
                           <Button
@@ -147,20 +144,18 @@ export function PlanningTable({
                             disabled={isStartingNewRound}
                             className="touch-target text-responsive-xs cursor-pointer border-emerald-200 bg-white/50 text-emerald-700 backdrop-blur-sm transition-all duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-lg dark:border-emerald-800 dark:bg-slate-900/50 dark:text-emerald-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/30"
                           >
-                            {t("room.startNewRound")}
+                            Начать новый раунд
                           </Button>
                         )}
                       </div>
                     ) : (
                       <div className="text-responsive-xs text-slate-600 dark:text-slate-300">
-                        {t("room.votingStatus", {
-                          voted: players.filter((p) => p.selectedCard).length,
-                          total: players.length,
-                        })}
+                        {players.filter((p) => p.selectedCard).length}/
+                        {players.length} проголосовали
                         {players.every((p) => p.selectedCard) &&
                           players.length > 0 && (
                             <div className="text-responsive-xs mt-1 font-medium text-blue-600 dark:text-blue-400">
-                              {t("room.revealingCards")}
+                              Раскрываем карты...
                             </div>
                           )}
                       </div>

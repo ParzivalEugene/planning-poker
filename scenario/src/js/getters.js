@@ -61,7 +61,7 @@ function get_id_by_selected_item(request) {
   if (selected_item && items) {
     log(
       "get_id_by_selected_item(): selected_item: " +
-        toPrettyString(selected_item),
+        toPrettyString(selected_item)
     );
     if (items[selected_item.index]) {
       return items[selected_item.index].id;

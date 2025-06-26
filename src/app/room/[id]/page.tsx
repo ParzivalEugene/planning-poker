@@ -1,9 +1,8 @@
 "use client";
 
-import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useI18n, useUser } from "@/contexts";
+import { useUser } from "@/contexts";
 import { useSaluteAssistant } from "@/hooks/useSaluteAssistant";
 import { isValidRoomId } from "@/lib/utils";
 import { api } from "@/trpc/react";
@@ -19,7 +18,6 @@ export default function Page() {
   const id = params.id as string;
   const router = useRouter();
   const { user, logout, isLoading, isLoggingOut } = useUser();
-  const { t } = useI18n();
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [isSelectingCard, setIsSelectingCard] = useState(false);
   const [connectionRetries, setConnectionRetries] = useState(0);
@@ -49,14 +47,14 @@ export default function Page() {
   const joinRoomMutation = api.poker.joinRoom.useMutation({
     onSuccess: () => {
       setConnectionRetries(0);
-      toast.success(t("room.joinedSuccessfully"));
+      toast.success("Успешно присоединились к комнате");
       void utils.poker.getRoomState.invalidate({ roomId: id });
     },
     onError: (error) => {
-      const errorMessage = t("errors.unknownError");
+      const errorMessage = "Неизвестная ошибка";
       toast.error(errorMessage);
 
-      if (errorMessage.includes("Room is full")) {
+      if (errorMessage.includes("заполнена")) {
         setTimeout(() => {
           router.push("/");
         }, 1000);
@@ -89,7 +87,7 @@ export default function Page() {
     },
     onError: (error) => {
       setSelectedCard(null);
-      toast.error(t("errors.cardSelectionFailed"));
+      toast.error("Не удалось выбрать карту");
     },
     onSettled: () => {
       setIsSelectingCard(false);
@@ -103,7 +101,7 @@ export default function Page() {
       void utils.poker.getRoomState.invalidate({ roomId: id });
     },
     onError: (error) => {
-      toast.error(t("errors.newRoundFailed"));
+      toast.error("Не удалось начать новый раунд");
     },
   });
 
@@ -149,9 +147,9 @@ export default function Page() {
   };
 
   const handleLogout = useCallback(() => {
-    toast.success(t("room.loggedOut"));
+    toast.success("Успешно вышли из системы");
     logout();
-  }, [logout, t]);
+  }, [logout]);
 
   useSaluteAssistant({
     roomState: {
@@ -287,12 +285,12 @@ export default function Page() {
     navigator.clipboard
       .writeText(roomLink)
       .then(() => {
-        toast.success(t("room.linkCopied"));
+        toast.success("Ссылка на комнату скопирована в буфер обмена");
       })
       .catch(() => {
-        toast.error(t("errors.copyFailed"));
+        toast.error("Не удалось скопировать ссылку в буфер обмена");
       });
-  }, [id, t]);
+  }, [id]);
 
   if (!id || !isValidRoomId(id)) {
     return null;
@@ -310,7 +308,7 @@ export default function Page() {
           <div className="text-center">
             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
             <p className="mt-2 text-slate-600 dark:text-slate-300">
-              {t("common.loading")}
+              Загрузка...
             </p>
           </div>
         </div>
@@ -342,13 +340,8 @@ export default function Page() {
 
               {/* Title - hidden on mobile */}
               <span className="text-responsive-sm hidden bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text font-semibold text-transparent md:block dark:from-white dark:via-blue-100 dark:to-indigo-100">
-                {t("home.title")}
+                Planning Poker
               </span>
-
-              {/* Language selector - hidden on mobile */}
-              <div className="hidden md:block">
-                <LanguageSelector />
-              </div>
             </div>
 
             {/* Right section - Stats and actions */}
@@ -374,7 +367,7 @@ export default function Page() {
               <div className="hidden flex-col gap-1 text-center md:flex md:flex-row md:gap-4">
                 <div className="text-center">
                   <div className="text-responsive-xs text-slate-600 dark:text-slate-400">
-                    {t("common.players")}
+                    Игроки
                   </div>
                   <div
                     className={`text-responsive-xs font-medium ${
@@ -390,7 +383,7 @@ export default function Page() {
                 </div>
                 <div className="text-center">
                   <div className="text-responsive-xs text-slate-600 dark:text-slate-400">
-                    {t("common.roomId")}
+                    ID комнаты
                   </div>
                   <div className="text-responsive-xs font-mono font-medium text-slate-800 dark:text-slate-200">
                     {id}
@@ -406,14 +399,14 @@ export default function Page() {
                   className="touch-target bg-emerald-500 px-2 text-xs shadow-lg transition-all duration-300 hover:bg-emerald-600 hover:shadow-xl sm:px-4 sm:text-sm"
                 >
                   <Copy size={14} className="sm:mr-2" />
-                  <span className="hidden sm:inline">{t("common.copy")}</span>
+                  <span className="hidden sm:inline">Ссылка</span>
                 </Button>
 
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  title={t("common.logout")}
+                  title="Выйти"
                   className="touch-target border-slate-200/50 bg-white/50 px-2 backdrop-blur-sm transition-all duration-300 hover:bg-white/80 hover:shadow-lg sm:px-3 dark:border-slate-700/50 dark:bg-slate-900/50 dark:hover:bg-slate-900/80"
                 >
                   <LogOut size={14} />
@@ -427,7 +420,7 @@ export default function Page() {
           <div className="mx-auto flex h-full w-full items-center justify-center">
             <PlanningTable
               players={players}
-              title={t("room.title")}
+              title="Planning Poker"
               isRevealed={roomState?.isRevealed ?? false}
               onStartNewRound={handleStartNewRound}
               isStartingNewRound={startNewRoundMutation.isPending}
@@ -439,28 +432,22 @@ export default function Page() {
         <footer className="card-selection flex-shrink-0 border-t border-white/20 bg-white/60 backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-900/60">
           <div className="container-responsive flex flex-col justify-center px-2 py-2 sm:px-4">
             <div className="flex flex-col gap-1 sm:gap-2">
-              {/* Mobile info bar - Room ID and Language selector */}
-              <div className="flex items-center justify-between md:hidden">
+              {/* Mobile info bar - Room ID */}
+              <div className="flex items-center justify-center md:hidden">
                 <div className="text-center">
                   <div className="text-xs text-slate-600 dark:text-slate-400">
-                    Room:{" "}
+                    Комната:{" "}
                     <span className="font-mono font-medium text-slate-800 dark:text-slate-200">
                       {id}
                     </span>
                   </div>
                 </div>
-                <LanguageSelector />
-              </div>
-
-              {/* Desktop language selector */}
-              <div className="hidden justify-center md:flex lg:hidden">
-                <LanguageSelector />
               </div>
 
               <p className="hidden text-center text-xs text-slate-600 sm:block dark:text-slate-400">
                 {roomState?.isRevealed
-                  ? t("room.cardsRevealedFooter")
-                  : t("room.availableCards")}
+                  ? "Карты раскрыты - Начните новый раунд для повторного голосования"
+                  : "Доступные карты:"}
               </p>
               <div className="mx-auto flex max-w-full flex-wrap justify-center gap-1 sm:max-w-4xl sm:gap-2">
                 {cardValues.map((value) => {
@@ -509,17 +496,17 @@ export default function Page() {
                 <div className="mt-1 text-center">
                   <div className="inline-block rounded border border-slate-200/50 bg-white/60 p-1 shadow backdrop-blur-sm sm:rounded-lg sm:p-2 dark:border-slate-700/50 dark:bg-slate-900/60">
                     <p className="text-xs text-slate-600 dark:text-slate-300">
-                      {t("room.capacityWarning", { current: players.length })}
+                      Вместимость комнаты: {players.length}/10 игроков
                       {players.length >= 10 && (
                         <span className="mt-1 block text-yellow-600 dark:text-yellow-400">
-                          {t("room.capacityFull").split("{contactLink}")[0]}
+                          Нужна большая вместимость? Свяжитесь с{" "}
                           <a
                             href="mailto:contact@michkoff.com"
                             className="font-medium underline decoration-2 underline-offset-2 transition-colors duration-200 hover:text-yellow-700 hover:decoration-yellow-600 dark:hover:text-yellow-300 dark:hover:decoration-yellow-400"
                           >
                             contact@michkoff.com
-                          </a>
-                          {t("room.capacityFull").split("{contactLink}")[1]}
+                          </a>{" "}
+                          для обсуждения партнерских возможностей 💰
                         </span>
                       )}
                     </p>
@@ -531,8 +518,7 @@ export default function Page() {
                 <div className="mt-1 text-center">
                   <div className="inline-block rounded border border-yellow-200/50 bg-yellow-50/60 p-1 shadow backdrop-blur-sm sm:rounded-lg sm:p-2 dark:border-yellow-800/50 dark:bg-yellow-950/60">
                     <p className="text-xs text-yellow-700 dark:text-yellow-300">
-                      {t("room.reconnecting")} ({connectionRetries}/
-                      {MAX_RETRIES})
+                      Переподключение ({connectionRetries}/{MAX_RETRIES})
                     </p>
                   </div>
                 </div>
@@ -542,7 +528,7 @@ export default function Page() {
                 <div className="mt-1 text-center">
                   <div className="inline-block rounded border border-red-200/50 bg-red-50/60 p-1 shadow backdrop-blur-sm sm:rounded-lg sm:p-2 dark:border-red-800/50 dark:bg-red-950/60">
                     <p className="text-xs text-red-700 dark:text-red-300">
-                      {t("room.connectionFailed")}
+                      Ошибка подключения
                       <Button
                         variant="link"
                         size="sm"
@@ -552,7 +538,7 @@ export default function Page() {
                           hasJoinedRoom.current = false;
                         }}
                       >
-                        {t("room.retry")}
+                        Повторить
                       </Button>
                     </p>
                   </div>

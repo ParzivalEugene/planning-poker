@@ -16,14 +16,36 @@ patterns:
     $number = $regexp<\d+>
 
 theme: /
-    state: Start
-        # При запуске приложения с кнопки прилетит сообщение /start.
-        q!: $regex</start>
-        # При запуске приложения с голоса прилетит сказанная фраза.
-        # Если названме приложения отличается, то выполнится переход к состоянию Fallback, будет проиграно "Я не понимаю".
-        # Обратите внимание, что если в названии приложения есть тире, их нужно заменить на пробелы ("my-canvas-test" -> "my canvas test")
-        q!: (запусти | открой | вруби) (покер планирования | poker planning | планирования покер)
-        a: Добро пожаловать в Poker Planning! Выберите карту или начните новый раунд.
+
+
+    state: runApp
+        event!: runApp
+        q!: * *start
+        q!: (запусти | открой | вруби) Покер Планирования
+        script:
+            $response.replies = $response.replies || [];
+            $response.replies.push({
+                type: 'raw',
+                body: {
+                    items: [
+                        {
+                            command: {
+                                type: "smart_app_data",
+                                smart_app_data: {
+                                    type: "app_action",
+                                    message: "запустиприложение"
+                                },
+                            },
+                            auto_listening: true
+                        },
+                    ],
+                },
+            });
+
+    state: createRoom
+        q!: (создай|войди|создать|войти|присоединиться)
+            [комната|комнату|комнаты]
+        a: Пока что через голос это сделать нельзя, но я обязательно скоро научусь 
 
     state: Fallback
         event!: noMatch

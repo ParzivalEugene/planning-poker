@@ -1,23 +1,21 @@
 "use client";
 
-import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useI18n, useUser } from "@/contexts";
+import { useUser } from "@/contexts";
 import { useDumbSaluteAssistant } from "@/hooks/useSaluteAssistant";
 import { isValidRoomId } from "@/lib/utils";
 import { Sparkles, Users } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export default function SignInPage() {
+function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, login, isLoading } = useUser();
-  const { t } = useI18n();
   const [username, setUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,7 +44,7 @@ export default function SignInPage() {
     setIsSubmitting(true);
     try {
       await login(username.trim());
-      toast.success(t("signIn.welcomeMessage"));
+      toast.success("Добро пожаловать в Planning Poker!");
 
       if (roomId && isValidRoomId(roomId)) {
         router.push(`/room/${roomId}`);
@@ -68,7 +66,7 @@ export default function SignInPage() {
           <div className="text-center">
             <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
             <p className="mt-2 text-slate-600 dark:text-slate-300">
-              {t("common.loading")}
+              Загрузка...
             </p>
           </div>
         </div>
@@ -83,10 +81,6 @@ export default function SignInPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5QzkyQUMiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>
-
-      <div className="absolute top-6 right-6 z-10">
-        <LanguageSelector />
-      </div>
 
       <div className="relative flex min-h-screen items-center justify-center p-6">
         <div className="w-full max-w-md space-y-8">
@@ -105,12 +99,12 @@ export default function SignInPage() {
 
             <div className="mt-8 space-y-4">
               <h1 className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-4xl font-bold text-transparent dark:from-white dark:via-blue-100 dark:to-indigo-100">
-                {t("signIn.title")}
+                Вход
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-300">
                 {roomId
-                  ? t("signIn.subtitleWithRoom", { roomId })
-                  : t("signIn.subtitle")}
+                  ? `Введите ваше имя пользователя для присоединения к комнате ${roomId}`
+                  : "Введите ваше имя пользователя для продолжения"}
               </p>
             </div>
           </div>
@@ -123,7 +117,7 @@ export default function SignInPage() {
                   <Users className="h-5 w-5 text-white" />
                 </div>
                 <CardTitle className="text-xl font-semibold">
-                  {t("signIn.welcome")}
+                  Добро пожаловать в Planning Poker
                 </CardTitle>
               </div>
             </CardHeader>
@@ -131,12 +125,12 @@ export default function SignInPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-3">
                   <Label htmlFor="username" className="text-sm font-medium">
-                    {t("common.username")}
+                    Имя пользователя
                   </Label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder={t("signIn.enterUsername")}
+                    placeholder="Введите ваше имя пользователя"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     disabled={isSubmitting}
@@ -152,7 +146,7 @@ export default function SignInPage() {
                   disabled={isSubmitting || !username.trim()}
                   size="lg"
                 >
-                  {isSubmitting ? t("signIn.signingIn") : t("common.signIn")}
+                  {isSubmitting ? "Вход..." : "Войти"}
                 </Button>
               </form>
             </CardContent>
@@ -162,7 +156,7 @@ export default function SignInPage() {
             <div className="text-center">
               <div className="inline-block rounded-2xl border border-slate-200/50 bg-white/60 p-4 shadow-lg backdrop-blur-sm dark:border-slate-700/50 dark:bg-slate-900/60">
                 <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  {t("signIn.redirectMessage", { roomId })}
+                  Вы будете перенаправлены в комнату {roomId} после входа
                 </p>
               </div>
             </div>
@@ -170,5 +164,27 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5QzkyQUMiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>
+      <div className="relative flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+          <p className="mt-2 text-slate-600 dark:text-slate-300">Загрузка...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SignInForm />
+    </Suspense>
   );
 }

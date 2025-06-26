@@ -1,11 +1,10 @@
 "use client";
 
-import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useI18n, useUser } from "@/contexts";
+import { useUser } from "@/contexts";
 import { useDumbSaluteAssistant } from "@/hooks/useSaluteAssistant";
 import { generateRoomId, isValidRoomId } from "@/lib/utils";
 import {
@@ -24,7 +23,6 @@ import { useState } from "react";
 export default function HomePage() {
   const router = useRouter();
   const { user } = useUser();
-  const { t } = useI18n();
   const [roomId, setRoomId] = useState("");
 
   const handleCreateRoom = () => {
@@ -61,33 +59,29 @@ export default function HomePage() {
   const features = [
     {
       icon: Zap,
-      title: t("home.features.realtime"),
-      description: "Instant updates across all devices",
+      title: "Голосование и раскрытие карт в реальном времени",
+      description: "Мгновенные обновления на всех устройствах",
     },
     {
       icon: Share2,
-      title: t("home.features.sharing"),
-      description: "Share rooms with simple links",
+      title: "Простой обмен комнатами с читаемыми ID",
+      description: "Делитесь комнатами с помощью простых ссылок",
     },
     {
       icon: RotateCcw,
-      title: t("home.features.rounds"),
-      description: "Multiple estimation rounds",
+      title: "Множественные раунды оценки",
+      description: "Несколько раундов оценки",
     },
     {
       icon: Users,
-      title: t("home.features.capacity"),
-      description: "Support for large teams",
+      title: "До 10 игроков в комнате",
+      description: "Поддержка больших команд",
     },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300 dark:from-slate-900 dark:via-slate-800 dark:to-slate-700">
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM5QzkyQUMiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-60"></div>
-
-      <div className="absolute top-6 right-6 z-10">
-        <LanguageSelector />
-      </div>
 
       <div className="relative flex min-h-screen flex-col items-center justify-center p-6">
         <div className="w-full max-w-4xl space-y-12 pb-40 md:pb-0">
@@ -105,14 +99,14 @@ export default function HomePage() {
             </div>
 
             <h1 className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-5xl leading-tight font-bold text-transparent md:text-6xl dark:from-white dark:via-blue-100 dark:to-indigo-100">
-              {t("home.title")}
+              Planning Poker
             </h1>
 
             {user && (
               <div className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-green-700 dark:border-green-800 dark:bg-green-950/30 dark:text-green-300">
                 <Crown className="h-4 w-4" />
                 <span className="text-sm font-medium">
-                  {t("home.welcomeBack", { username: user.username })}
+                  С возвращением, {user.username}!
                 </span>
               </div>
             )}
@@ -127,20 +121,20 @@ export default function HomePage() {
                     <Play className="h-5 w-5 text-white" />
                   </div>
                   <CardTitle className="text-xl font-semibold">
-                    {t("home.createRoom.title")}
+                    Создать новую комнату
                   </CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="relative space-y-4">
                 <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  {t("home.createRoom.description")}
+                  Сгенерировать новую комнату с уникальным ID
                 </p>
                 <Button
                   onClick={handleCreateRoom}
                   className="group w-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl"
                   size="lg"
                 >
-                  <span>{t("home.createRoom.button")}</span>
+                  <span>Создать комнату</span>
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Button>
               </CardContent>
@@ -154,18 +148,18 @@ export default function HomePage() {
                     <Users className="h-5 w-5 text-white" />
                   </div>
                   <CardTitle className="text-xl font-semibold">
-                    {t("home.joinRoom.title")}
+                    Присоединиться к существующей комнате
                   </CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="relative space-y-4">
                 <div className="space-y-3">
                   <Label htmlFor="roomId" className="text-sm font-medium">
-                    {t("common.roomId")}
+                    ID комнаты
                   </Label>
                   <Input
                     id="roomId"
-                    placeholder={t("home.joinRoom.placeholder")}
+                    placeholder="abc-defg-jkl"
                     value={roomId}
                     onChange={(e) => setRoomId(e.target.value)}
                     onKeyDown={(e) => {
@@ -176,7 +170,7 @@ export default function HomePage() {
                     className="border-slate-200 bg-white/50 transition-all duration-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800/50"
                   />
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {t("home.joinRoom.description")}
+                    Введите 9-символьный ID комнаты
                   </p>
                 </div>
                 <Button
@@ -186,7 +180,7 @@ export default function HomePage() {
                   size="lg"
                   disabled={!roomId.trim()}
                 >
-                  <span>{t("home.joinRoom.button")}</span>
+                  <span>Присоединиться</span>
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Button>
               </CardContent>

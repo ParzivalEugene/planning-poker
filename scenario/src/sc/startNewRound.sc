@@ -1,16 +1,21 @@
 theme: /
 
     state: НовыйРаунд
-        q!: (начни|начать|запусти|старт) 
+        q!: (начни|начать|запусти|старт|начнем) 
             [новый|следующий] 
             [раунд|игру|голосование]
         q!: следующий раунд
         q!: новая игра
-        q!: начать сначала
             
         script:
             log('startNewRound: context: ' + JSON.stringify($context))
+            var inRoom = $request.rawRequest.payload.meta.current_app.state.inRoom
             
+            if (!inRoom) {
+                $reactions.answer("Чтобы начать новый раунд, зайдите в комнату.");
+                return;
+            }
+
             startNewRound($context);
             
             var responses = [
